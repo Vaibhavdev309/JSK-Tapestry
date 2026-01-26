@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: tapestry-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Add your environment variables in Render dashboard:
+      # MONGODB_URI
+      # CLOUDINARY_API_KEY
+      # CLOUDINARY_SECRET_KEY
+      # CLOUDINARY_NAME
+      # JWT_SECRET
+      # ADMIN_EMAIL
+      # ADMIN_PASSWORD
+      # GOOGLE_CLIENT_ID
+      # GOOGLE_CLIENT_SECRET
+      # RAZORPAY_KEY_ID
+      # RAZORPAY_KEY_SECRET
+      # EMAIL_HOST
+      # EMAIL_PORT
+      # EMAIL_SECURE
+      # EMAIL_USER
+      # EMAIL_PASSWORD
+      # FRONTEND_URL (your Vercel frontend URL)

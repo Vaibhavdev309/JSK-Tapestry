@@ -22,7 +22,42 @@ connectDB();
 connectCloudinary();
 
 app.use(express.json());
-app.use(cors());
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, or curl)
+    if (!origin) return callback(null, true);
+    
+    // List of allowed origins
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5174",
+      "http://localhost:5173",
+      "http://127.0.0.1:5174",
+      "http://127.0.0.1:5173",
+    ].filter(Boolean); // Remove undefined values
+    
+    // In production, also allow Vercel preview and production URLs
+    if (process.env.NODE_ENV === "production") {
+      // Allow any Vercel deployment
+      if (origin.includes("vercel.app") || origin.includes("vercel.com")) {
+        return callback(null, true);
+      }
+    }
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.length === 0) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "token"],
+};
+
+app.use(cors(corsOptions));
 
 // Register routes
 app.use("/api/user", userRouter);
@@ -59,11 +94,38 @@ const server = app.listen(port, "0.0.0.0", () => {
   console.log("🌐 API endpoint: http://localhost:" + port + "/api");
 });
 
+// Socket.IO CORS configuration
+const socketCorsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5174",
+      "http://localhost:5173",
+      "http://127.0.0.1:5174",
+      "http://127.0.0.1:5173",
+    ].filter(Boolean);
+    
+    // In production, allow Vercel deployments
+    if (process.env.NODE_ENV === "production") {
+      if (origin.includes("vercel.app") || origin.includes("vercel.com")) {
+        return callback(null, true);
+      }
+    }
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.length === 0) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
 const io = new Server(server, {
   pingTimeout: 60000,
-  cors: {
-    origin: "*",
-  },
+  cors: socketCorsOptions,
 });
 
 io.on("connection", (socket) => {
