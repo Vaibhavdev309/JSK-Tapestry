@@ -1,0 +1,225 @@
+import nodemailer from "nodemailer";
+
+// Create reusable transporter
+const createTransporter = () => {
+  // Use environment variables for email configuration
+  // For Gmail, you can use OAuth2 or App Password
+  // For other providers, adjust accordingly
+  
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.EMAIL_PORT || "587"),
+    secure: process.env.EMAIL_SECURE === "true", // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD, // Use App Password for Gmail
+    },
+  });
+
+  return transporter;
+};
+
+// Send verification email
+export const sendVerificationEmail = async (email, name, verificationToken) => {
+  try {
+    console.log("📧 [EMAIL] Sending verification email to:", email);
+    
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.error("❌ Email credentials not configured");
+      throw new Error("Email service not configured");
+    }
+
+    const transporter = createTransporter();
+    
+    // Verify transporter configuration
+    await transporter.verify();
+    console.log("✅ Email server connection verified");
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
+    const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+
+    const mailOptions = {
+      from: `"Tapestry" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Verify Your Email Address - Tapestry",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Tapestry!</h1>
+          </div>
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <p style="font-size: 16px; margin-bottom: 20px;">Hi ${name},</p>
+            <p style="font-size: 16px; margin-bottom: 20px;">
+              Thank you for creating an account with Tapestry! Please verify your email address to complete your registration.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" 
+                 style="display: inline-block; background: #D97706; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
+                Verify Email Address
+              </a>
+            </div>
+            <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
+              Or copy and paste this link into your browser:
+            </p>
+            <p style="font-size: 12px; color: #9ca3af; word-break: break-all; background: #f3f4f6; padding: 10px; border-radius: 4px;">
+              ${verificationUrl}
+            </p>
+            <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
+              This link will expire in 24 hours. If you didn't create an account with Tapestry, please ignore this email.
+            </p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
+              © ${new Date().getFullYear()} Tapestry. All rights reserved.
+            </p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Welcome to Tapestry!
+        
+        Hi ${name},
+        
+        Thank you for creating an account with Tapestry! Please verify your email address by clicking the link below:
+        
+        ${verificationUrl}
+        
+        This link will expire in 24 hours. If you didn't create an account with Tapestry, please ignore this email.
+        
+        © ${new Date().getFullYear()} Tapestry. All rights reserved.
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Verification email sent:", info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("❌ [EMAIL] Error sending verification email:", error);
+    throw error;
+  }
+};
+
+// Send contact form notification to admin
+export const sendContactNotificationEmail = async (contact) => {
+  try {
+    console.log("📧 [EMAIL] Sending contact notification to admin");
+    
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.error("❌ Email credentials not configured");
+      return; // Don't throw - contact form should work even if email fails
+    }
+
+    const transporter = createTransporter();
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+
+    const mailOptions = {
+      from: `"Tapestry Contact Form" <${process.env.EMAIL_USER}>`,
+      to: adminEmail,
+      subject: `New Contact Form Submission: ${contact.subject || "General Inquiry"}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">New Contact Form Submission</h1>
+          </div>
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <p><strong>Name:</strong> ${contact.name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${contact.email}">${contact.email}</a></p>
+            <p><strong>Subject:</strong> ${contact.subject || "General Inquiry"}</p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+            <p><strong>Message:</strong></p>
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; white-space: pre-wrap;">${contact.message}</div>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+            <p style="font-size: 12px; color: #9ca3af;">
+              Submitted: ${new Date(contact.createdAt).toLocaleString()}
+              ${contact.userId ? `<br>User ID: ${contact.userId}` : '<br>Guest submission'}
+            </p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        New Contact Form Submission
+        
+        Name: ${contact.name}
+        Email: ${contact.email}
+        Subject: ${contact.subject || "General Inquiry"}
+        
+        Message:
+        ${contact.message}
+        
+        Submitted: ${new Date(contact.createdAt).toLocaleString()}
+        ${contact.userId ? `User ID: ${contact.userId}` : 'Guest submission'}
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Contact notification email sent to admin");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ [EMAIL] Error sending contact notification:", error);
+    // Don't throw - contact form should work even if email fails
+    return { success: false, error: error.message };
+  }
+};
+
+// Send password reset email (for future use)
+export const sendPasswordResetEmail = async (email, name, resetToken) => {
+  try {
+    console.log("📧 [EMAIL] Sending password reset email to:", email);
+    
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      throw new Error("Email service not configured");
+    }
+
+    const transporter = createTransporter();
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    const mailOptions = {
+      from: `"Tapestry" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Reset Your Password - Tapestry",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">Password Reset Request</h1>
+          </div>
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <p>Hi ${name},</p>
+            <p>You requested to reset your password. Click the button below to reset it:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="display: inline-block; background: #D97706; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                Reset Password
+              </a>
+            </div>
+            <p style="font-size: 14px; color: #6b7280;">This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.</p>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Password reset email sent");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ [EMAIL] Error sending password reset email:", error);
+    throw error;
+  }
+};
