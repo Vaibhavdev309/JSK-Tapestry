@@ -8,12 +8,34 @@ const createTransporter = () => {
   
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.EMAIL_PORT || "587"),
+    port: Number.parseInt(process.env.EMAIL_PORT || "587", 10),
     secure: process.env.EMAIL_SECURE === "true", // true for 465, false for other ports
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD, // Use App Password for Gmail
     },
+    // Connection timeout settings for cloud platforms
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 5000, // 5 seconds
+    socketTimeout: 10000, // 10 seconds
+    // Pool connections for better performance
+    pool: true,
+    maxConnections: 1,
+    maxMessages: 3,
+    // Retry configuration
+    retry: {
+      attempts: 3,
+      delay: 2000, // 2 seconds between retries
+    },
+    // TLS options for better compatibility with cloud platforms
+    tls: {
+      rejectUnauthorized: false, // Accept self-signed certificates (needed for some cloud providers)
+      // Use modern TLS settings
+      minVersion: 'TLSv1.2',
+    },
+    // Debug mode (set to true for troubleshooting)
+    debug: process.env.NODE_ENV === "development",
+    logger: process.env.NODE_ENV === "development",
   });
 
   return transporter;
@@ -31,9 +53,24 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
 
     const transporter = createTransporter();
     
-    // Verify transporter configuration
-    await transporter.verify();
-    console.log("✅ Email server connection verified");
+    // Verify transporter configuration with timeout
+    try {
+      await Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Connection timeout")), 8000)
+        )
+      ]);
+      console.log("✅ Email server connection verified");
+    } catch (verifyError) {
+      console.error("⚠️ Email server verification failed:", verifyError.message);
+      // Continue anyway - sometimes verify fails but sending works
+      if (verifyError.message.includes("timeout")) {
+        console.log("⚠️ Continuing without verification - connection may still work");
+      } else {
+        throw verifyError;
+      }
+    }
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
     const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
@@ -96,12 +133,21 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
       `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    // Send email with timeout protection
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Email send timeout after 15 seconds")), 15000)
+    );
+    
+    const info = await Promise.race([sendPromise, timeoutPromise]);
     console.log("✅ Verification email sent:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ [EMAIL] Error sending verification email:", error);
-    throw error;
+    console.error("❌ [EMAIL] Error sending verification email:", error.message);
+    // Don't throw - allow registration to complete even if email fails
+    // User can request resend later
+    console.log("⚠️ Registration will continue - user can request email resend");
+    return { success: false, error: error.message };
   }
 };
 
@@ -215,11 +261,17 @@ export const sendPasswordResetEmail = async (email, name, resetToken) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    // Send email with timeout protection
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Email send timeout after 15 seconds")), 15000)
+    );
+    
+    await Promise.race([sendPromise, timeoutPromise]);
     console.log("✅ Password reset email sent");
     return { success: true };
   } catch (error) {
-    console.error("❌ [EMAIL] Error sending password reset email:", error);
-    throw error;
+    console.error("❌ [EMAIL] Error sending password reset email:", error.message);
+    throw error; // Password reset is critical, so throw error
   }
 };

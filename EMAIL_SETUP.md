@@ -116,7 +116,11 @@ FRONTEND_URL=https://yourdomain.com
 
 3. **Common Issues:**
    - **Gmail "Less secure app" error:** Use App Password, not regular password
-   - **Connection timeout:** Check firewall/network settings
+   - **Connection timeout on cloud platforms (Render, Heroku, etc.):**
+     - Gmail SMTP may block connections from cloud IPs
+     - Solution: Use a professional email service (SendGrid, Mailgun) for production
+     - Or use Gmail with OAuth2 instead of App Password
+     - The code now includes timeout protection (10s connection, 15s send timeout)
    - **Authentication failed:** Verify email and password are correct
    - **Email in spam:** Check spam folder, consider using custom domain
 

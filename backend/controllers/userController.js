@@ -139,11 +139,11 @@ const registerUser = async (req, res) => {
     console.log("✅ User created:", user._id);
 
     // Send verification email
-    try {
-      await sendVerificationEmail(user.email, user.name, verificationToken);
+    const emailResult = await sendVerificationEmail(user.email, user.name, verificationToken);
+    if (emailResult.success) {
       console.log("✅ Verification email sent");
-    } catch (emailError) {
-      console.error("❌ Error sending verification email:", emailError);
+    } else {
+      console.error("❌ Error sending verification email:", emailResult.error);
       // Don't fail registration if email fails, but log it
       // User can request resend later
     }
