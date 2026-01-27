@@ -31,7 +31,7 @@ const Collection = () => {
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
-  const [sortType, setSortType] = useState("Type");
+  const [sortType, setSortType] = useState("Size");
 
   const toggleCategory = (e) => {
     const value = e.target.value;
