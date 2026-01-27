@@ -44,6 +44,18 @@ const Sidebar = ({ closeSidebar, isMobile, counts = { orders: 0, chats: 0, price
         </NavLink>
 
         <NavLink
+          to="/categories"
+          onClick={isMobile ? closeSidebar : null}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors border-l-4
+            ${isActive ? activeStyle : normalStyle}`
+          }
+        >
+          <OrderIcon className="w-5 h-5" />
+          <span className="text-sm lg:text-base">Categories</span>
+        </NavLink>
+
+        <NavLink
           to="/orders"
           onClick={isMobile ? closeSidebar : null}
           className={({ isActive }) =>

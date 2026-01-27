@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UPLOAD_AREA_DATA_URI } from "../utils/icons";
 import axios from "axios";
 import { backendUrl } from "../App";
@@ -12,12 +12,59 @@ const Add = ({ token }) => {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Ganesha");
-  const [subCategory, setSubCategory] = useState("1X1");
+  const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
   const [price, setPrice] = useState("");
   const [bestSeller, setBestSeller] = useState(false);
   const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    // Update subcategories when category changes
+    if (category) {
+      const selectedCategory = categories.find(cat => cat.name === category);
+      if (selectedCategory) {
+        setSubCategories(selectedCategory.subCategories || []);
+        // Reset subcategory if it's not in the new list
+        if (selectedCategory.subCategories.length > 0) {
+          if (!selectedCategory.subCategories.includes(subCategory)) {
+            setSubCategory(selectedCategory.subCategories[0]);
+          }
+        } else {
+          setSubCategory("");
+        }
+      }
+    } else {
+      setSubCategories([]);
+      setSubCategory("");
+    }
+  }, [category, categories]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/category/list`);
+      if (response.data.success) {
+        setCategories(response.data.categories);
+        // Set default category if available
+        if (response.data.categories.length > 0) {
+          const firstCategory = response.data.categories[0];
+          setCategory(firstCategory.name);
+          if (firstCategory.subCategories.length > 0) {
+            setSubCategory(firstCategory.subCategories[0]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      toast.error("Failed to load categories");
+    }
+  };
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -106,8 +153,19 @@ const Add = ({ token }) => {
         setName("");
         setDescription("");
         setPrice("");
-        setCategory("Ganesha");
-        setSubCategory("1X1");
+        // Reset to first category if available
+        if (categories.length > 0) {
+          const firstCategory = categories[0];
+          setCategory(firstCategory.name);
+          if (firstCategory.subCategories.length > 0) {
+            setSubCategory(firstCategory.subCategories[0]);
+          } else {
+            setSubCategory("");
+          }
+        } else {
+          setCategory("");
+          setSubCategory("");
+        }
         setBestSeller(false);
         setSizes([]);
         setImage1(false);
@@ -210,40 +268,57 @@ const Add = ({ token }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Category
+              Category *
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
             >
-              <option value="Ganesha">Ganesha</option>
-              <option value="Buddha">Buddha</option>
-              <option value="Holi">Holi</option>
-              <option value="Radha">Radha</option>
-              <option value="Radha Krishna">Radha Krishna</option>
-              <option value="Hunting">Hunting</option>
-              <option value="Lakshmi">Lakshmi</option>
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
+            {categories.length === 0 && (
+              <p className="text-xs text-red-500">
+                No categories available. Please add categories first.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
-              Sub Category
+              Sub Category *
             </label>
             <select
               value={subCategory}
               onChange={(e) => setSubCategory(e.target.value)}
               className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+              disabled={!category || subCategories.length === 0}
             >
-              <option value="1X1">1X1</option>
-              <option value="1X2">1X2</option>
-              <option value="1X3">1X3</option>
-              <option value="2X1">2X1</option>
-              <option value="3X1">3X1</option>
-              <option value="3X3">3X3</option>
-              <option value="6X6">6X6</option>
+              <option value="">
+                {!category 
+                  ? "Select category first" 
+                  : subCategories.length === 0 
+                    ? "No subcategories available" 
+                    : "Select Sub Category"}
+              </option>
+              {subCategories.map((sub, index) => (
+                <option key={index} value={sub}>
+                  {sub}
+                </option>
+              ))}
             </select>
+            {category && subCategories.length === 0 && (
+              <p className="text-xs text-yellow-600">
+                No subcategories for this category. You can add subcategories in Categories page.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

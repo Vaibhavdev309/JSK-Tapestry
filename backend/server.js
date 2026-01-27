@@ -14,6 +14,7 @@ import priceRequestRouter from "./routes/priceRequestRouter.js";
 import paymentRouter from "./routes/paymentRoute.js";
 import contactRouter from "./routes/contactRoute.js";
 import adminRouter from "./routes/adminRoute.js";
+import categoryRouter from "./routes/categoryRoute.js";
 import messageModel from "./models/messageModel.js";
 
 const app = express();
@@ -29,13 +30,22 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps, Postman, or curl)
     if (!origin) return callback(null, true);
     
+    // In development, allow localhost on any port for easier local development
+    if (process.env.NODE_ENV !== "production") {
+      if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        return callback(null, true);
+      }
+    }
+    
     // List of allowed origins
     const allowedOrigins = [
       process.env.FRONTEND_URL,
-      "http://localhost:5174",
-      "http://localhost:5173",
+      "http://localhost:5174", // Frontend
+      "http://localhost:5173", // Frontend (alternative port)
+      "http://localhost:5175", // Admin panel
       "http://127.0.0.1:5174",
       "http://127.0.0.1:5173",
+      "http://127.0.0.1:5175", // Admin panel (alternative)
     ].filter(Boolean); // Remove undefined values
     
     // In production, also allow Vercel preview and production URLs
@@ -70,6 +80,7 @@ app.use("/api/price-requests", priceRequestRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/category", categoryRouter);
 
 // Log registered routes on startup
 console.log("✅ Routes registered:");
@@ -83,6 +94,7 @@ console.log("  - /api/price-requests");
 console.log("  - /api/payment (razorpay create-order, verify, key)");
 console.log("  - /api/contact (submit, admin: list, update, delete)");
 console.log("  - /api/admin (counts)");
+console.log("  - /api/category (list, create, update, delete, manage subcategories)");
 
 app.get("/", (req, res) => {
   res.send("API working");
@@ -99,12 +111,21 @@ const socketCorsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     
+    // In development, allow localhost on any port for easier local development
+    if (process.env.NODE_ENV !== "production") {
+      if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        return callback(null, true);
+      }
+    }
+    
     const allowedOrigins = [
       process.env.FRONTEND_URL,
-      "http://localhost:5174",
-      "http://localhost:5173",
+      "http://localhost:5174", // Frontend
+      "http://localhost:5173", // Frontend (alternative port)
+      "http://localhost:5175", // Admin panel
       "http://127.0.0.1:5174",
       "http://127.0.0.1:5173",
+      "http://127.0.0.1:5175", // Admin panel (alternative)
     ].filter(Boolean);
     
     // In production, allow Vercel deployments

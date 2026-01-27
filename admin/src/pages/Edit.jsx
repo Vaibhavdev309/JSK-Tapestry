@@ -19,11 +19,47 @@ const Edit = ({ token }) => {
   const [existingImages, setExistingImages] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Ganesha");
-  const [subCategory, setSubCategory] = useState("1X1");
+  const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
   const [price, setPrice] = useState("");
   const [bestSeller, setBestSeller] = useState(false);
   const [sizes, setSizes] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${backendUrl}/api/category/list`);
+        if (response.data.success) {
+          setCategories(response.data.categories);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Update subcategories when category changes
+  useEffect(() => {
+    if (category) {
+      const selectedCategory = categories.find(cat => cat.name === category);
+      if (selectedCategory) {
+        setSubCategories(selectedCategory.subCategories || []);
+        // If current subcategory is not in the list, keep it (might be from old data)
+        if (selectedCategory.subCategories.length > 0) {
+          if (!selectedCategory.subCategories.includes(subCategory)) {
+            // If subcategory doesn't exist in new list, set to first available
+            setSubCategory(selectedCategory.subCategories[0]);
+          }
+        }
+      }
+    } else {
+      setSubCategories([]);
+    }
+  }, [category, categories]);
 
   // Fetch product data
   useEffect(() => {
@@ -73,8 +109,8 @@ const Edit = ({ token }) => {
 
           setName(product.name || "");
           setDescription(product.description || "");
-          setCategory(product.category || "Ganesha");
-          setSubCategory(product.subCategory || "1X1");
+          setCategory(product.category || "");
+          setSubCategory(product.subCategory || "");
           setPrice(product.price?.toString() || "");
           setBestSeller(product.bestSeller || false);
           setSizes(product.sizes || []);
@@ -450,14 +486,18 @@ const Edit = ({ token }) => {
                 className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
-                <option value="Ganesha">Ganesha</option>
-                <option value="Buddha">Buddha</option>
-                <option value="Holi">Holi</option>
-                <option value="Radha">Radha</option>
-                <option value="Radha Krishna">Radha Krishna</option>
-                <option value="Hunting">Hunting</option>
-                <option value="Lakshmi">Lakshmi</option>
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
+              {categories.length === 0 && (
+                <p className="text-xs text-red-500">
+                  No categories available. Please add categories first.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -469,15 +509,26 @@ const Edit = ({ token }) => {
                 onChange={(e) => setSubCategory(e.target.value)}
                 className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
+                disabled={!category || subCategories.length === 0}
               >
-                <option value="1X1">1X1</option>
-                <option value="1X2">1X2</option>
-                <option value="1X3">1X3</option>
-                <option value="2X1">2X1</option>
-                <option value="3X1">3X1</option>
-                <option value="3X3">3X3</option>
-                <option value="6X6">6X6</option>
+                <option value="">
+                  {!category 
+                    ? "Select category first" 
+                    : subCategories.length === 0 
+                      ? "No subcategories available" 
+                      : "Select Sub Category"}
+                </option>
+                {subCategories.map((sub, index) => (
+                  <option key={index} value={sub}>
+                    {sub}
+                  </option>
+                ))}
               </select>
+              {category && subCategories.length === 0 && (
+                <p className="text-xs text-yellow-600">
+                  No subcategories for this category. You can add subcategories in Categories page.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

@@ -13,6 +13,7 @@ import { ToastContainer } from "react-toastify";
 import Chat from "./pages/Chat";
 import Request from "./pages/Request";
 import Contact from "./pages/Contact";
+import Categories from "./pages/Categories";
 import { AdminProvider } from "./Context/AdminContext";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
@@ -143,6 +144,7 @@ const App = () => {
                   <Route path="/chats" element={<Chat token={token} isAdmin={true} />} />
                   <Route path="/request" element={<Request token={token} />} />
                   <Route path="/contact" element={<Contact token={token} />} />
+                  <Route path="/categories" element={<Categories token={token} />} />
                 </Routes>
               </div>
             </main>
