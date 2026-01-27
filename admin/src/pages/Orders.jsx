@@ -3,7 +3,7 @@ import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
 import { ParcelIcon } from "../utils/icons";
-import { useAdminContext } from "../context/AdminContext";
+import { useAdminContext } from "../Context/AdminContext";
 
 const Orders = ({ token }) => {
   const { refreshCounts } = useAdminContext();

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
 import { UPLOAD_AREA_DATA_URI } from "../utils/icons";
-import { useAdminContext } from "../context/AdminContext";
+import { useAdminContext } from "../Context/AdminContext";
 
 const Request = ({ token }) => {
   const { refreshCounts } = useAdminContext();

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
 import { toast } from "react-toastify";
-import { useAdminContext } from "../context/AdminContext";
+import { useAdminContext } from "../Context/AdminContext";
 
 const Contact = ({ token }) => {
   const { refreshCounts } = useAdminContext();

@@ -13,7 +13,7 @@ import { ToastContainer } from "react-toastify";
 import Chat from "./pages/Chat";
 import Request from "./pages/Request";
 import Contact from "./pages/Contact";
-import { AdminProvider } from "./context/AdminContext";
+import { AdminProvider } from "./Context/AdminContext";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 export const currency = "$";

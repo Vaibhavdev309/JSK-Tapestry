@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { backendUrl } from "../App";
 import io from "socket.io-client";
-import { useAdminContext } from "../context/AdminContext";
+import { useAdminContext } from "../Context/AdminContext";
 
 const Chat = ({ token, isAdmin }) => {
   const { refreshCounts } = useAdminContext();
