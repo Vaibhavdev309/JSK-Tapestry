@@ -41,7 +41,7 @@ const Hero = () => {
         </div>
         <div className="relative w-full max-w-xl px-4 sm:px-6 mx-auto lg:pl-8 lg:pr-0 lg:mb-0 lg:mx-0 lg:w-1/2 lg:max-w-none lg:flex lg:items-center lg:justify-end min-w-0">
           <img
-            className="object-cover w-full h-56 sm:h-64 md:h-72 lg:h-[28rem] lg:max-h-[32rem] rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl shadow-xl"
+            className="object-contain w-full h-auto max-h-[32rem] rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl shadow-xl"
             src={HERO_IMAGE}
             alt="Indian handloom tapestries and wall art"
             onError={(e) => {
