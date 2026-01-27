@@ -15,12 +15,13 @@ const FilterIcon = () => (
 const sizeOrder = ["1X1", "1X2", "1X3", "3X1", "2X1", "3X3", "6X6"];
 const typeOrder = [
   "Buddha",
-  "Ganesha",
-  "Lakshmi",
-  "Radha",
-  "Radha Krishna",
-  "Hunting",
+  "Ganesh ji",
   "Holi",
+  "Hunting",
+  "Jhula",
+  "Lakshmi Ji",
+  "Raash Leela",
+  "Radha Krishna gaay",
 ];
 
 const Collection = () => {
