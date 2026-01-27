@@ -14,20 +14,25 @@ const connectDB = async () => {
     // If it's a MongoDB Atlas connection string (mongodb+srv://) or standard connection string
     // and doesn't already have a database name, append it
     if (connectionString.includes("mongodb+srv://") || connectionString.includes("mongodb://")) {
-      // Check if database name is already in the connection string
-      const dbNameRegex = /\/[^/?]+(\?|$)/;
-      const hasDatabase = dbNameRegex.exec(connectionString);
+      // Use regex to parse MongoDB connection string
+      // Format: mongodb+srv://user:pass@host:port/database?options
+      // Match groups: [1]=protocol+credentials+host, [2]=/database or /, [3]=?options (optional)
+      const mongoUriRegex = /^((?:mongodb\+?srv?:\/\/[^/?#]+))(\/[^?#]*)?(\?.*)?$/;
+      const match = mongoUriRegex.exec(connectionString);
       
-      if (!hasDatabase) {
-        // No database specified, append /tapestry
-        // Handle query parameters
-        if (connectionString.includes("?")) {
-          connectionString = connectionString.replace("?", "/tapestry?");
-        } else {
-          connectionString = connectionString.endsWith("/") 
-            ? `${connectionString}tapestry` 
-            : `${connectionString}/tapestry`;
+      if (match) {
+        const baseUrl = match[1]; // mongodb+srv://user:pass@host
+        const existingDb = match[2]; // /database, /, or undefined
+        const queryParams = match[3] || ""; // ?options or ""
+        
+        // Check if database is already specified
+        // existingDb will be like "/database" if present, "/" if just a slash, or undefined if not
+        // We need to add database name if: undefined, "/", or empty string
+        if (!existingDb || existingDb === "/" || existingDb.trim() === "") {
+          // No database specified, add /tapestry
+          connectionString = `${baseUrl}/tapestry${queryParams}`;
         }
+        // If existingDb has a value (and it's not just "/"), database is already specified
       }
     }
 
