@@ -11,6 +11,8 @@ const Categories = ({ token }) => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [showAddCategoryForm, setShowAddCategoryForm] = useState(false);
   const [categoryName, setCategoryName] = useState("");
+  const [bulkCategoryMode, setBulkCategoryMode] = useState(false);
+  const [bulkCategoryInput, setBulkCategoryInput] = useState("");
   
   // Subcategory states
   const [editingSubCategory, setEditingSubCategory] = useState(null);
@@ -18,6 +20,8 @@ const Categories = ({ token }) => {
   const [selectedCategoryForSub, setSelectedCategoryForSub] = useState("");
   const [subCategoryName, setSubCategoryName] = useState("");
   const [oldSubCategoryName, setOldSubCategoryName] = useState("");
+  const [bulkSubCategoryMode, setBulkSubCategoryMode] = useState(false);
+  const [bulkSubCategoryInput, setBulkSubCategoryInput] = useState("");
 
   useEffect(() => {
     fetchCategories();
@@ -61,6 +65,57 @@ const Categories = ({ token }) => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add category");
+    }
+  };
+
+  const handleBulkAddCategories = async (e) => {
+    e.preventDefault();
+    if (!bulkCategoryInput.trim()) {
+      toast.error("Please enter at least one category name");
+      return;
+    }
+
+    // Parse input - support both comma-separated and newline-separated
+    const lines = bulkCategoryInput
+      .split(/[,\n]/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    if (lines.length === 0) {
+      toast.error("Please enter at least one valid category name");
+      return;
+    }
+
+    // Convert to array of category objects
+    const categories = lines.map(name => ({
+      name,
+      subCategories: []
+    }));
+
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/category/create-multiple`,
+        { categories },
+        { headers: { token } }
+      );
+
+      if (response.data.success) {
+        const { created, skipped, errors } = response.data.results;
+        let message = `Successfully created ${created.length} category/categories`;
+        if (skipped.length > 0) {
+          message += `. Skipped ${skipped.length} (already exist)`;
+        }
+        if (errors.length > 0) {
+          message += `. ${errors.length} error(s) occurred`;
+        }
+        toast.success(message);
+        setBulkCategoryInput("");
+        setBulkCategoryMode(false);
+        setShowAddCategoryForm(false);
+        fetchCategories();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add categories");
     }
   };
 
@@ -122,6 +177,8 @@ const Categories = ({ token }) => {
   const cancelCategoryEdit = () => {
     setEditingCategory(null);
     setCategoryName("");
+    setBulkCategoryInput("");
+    setBulkCategoryMode(false);
     setShowAddCategoryForm(false);
   };
 
@@ -162,6 +219,58 @@ const Categories = ({ token }) => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add subcategory");
+    }
+  };
+
+  const handleBulkAddSubCategories = async (e) => {
+    e.preventDefault();
+    if (!selectedCategoryForSub) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (!bulkSubCategoryInput.trim()) {
+      toast.error("Please enter at least one subcategory name");
+      return;
+    }
+
+    // Parse input - support both comma-separated and newline-separated
+    const subCategories = bulkSubCategoryInput
+      .split(/[,\n]/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    if (subCategories.length === 0) {
+      toast.error("Please enter at least one valid subcategory name");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/category/add-multiple-subcategories`,
+        {
+          categoryId: selectedCategoryForSub,
+          subCategories
+        },
+        { headers: { token } }
+      );
+
+      if (response.data.success) {
+        const { added, skipped, errors } = response.data.results;
+        let message = `Successfully added ${added.length} subcategory/subcategories`;
+        if (skipped.length > 0) {
+          message += `. Skipped ${skipped.length} (already exist)`;
+        }
+        if (errors.length > 0) {
+          message += `. ${errors.length} error(s) occurred`;
+        }
+        toast.success(message);
+        setBulkSubCategoryInput("");
+        setBulkSubCategoryMode(false);
+        setShowAddSubCategoryForm(false);
+        fetchCategories();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add subcategories");
     }
   };
 
@@ -254,6 +363,8 @@ const Categories = ({ token }) => {
     setEditingSubCategory(null);
     setSubCategoryName("");
     setOldSubCategoryName("");
+    setBulkSubCategoryInput("");
+    setBulkSubCategoryMode(false);
     setSelectedCategoryForSub("");
     setShowAddSubCategoryForm(false);
   };
@@ -289,12 +400,95 @@ const Categories = ({ token }) => {
         </div>
 
         {/* Add/Edit Category Form */}
-        {(showAddCategoryForm || editingCategory) && (
+        {(showAddCategoryForm || editingCategory) && !editingCategory && (
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-lg font-medium mb-3">
-              {editingCategory ? "Edit Category" : "Add New Category"}
-            </h3>
-            <form onSubmit={editingCategory ? handleUpdateCategory : handleAddCategory}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium">Add New Category</h3>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBulkCategoryMode(false)}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    !bulkCategoryMode
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Single
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBulkCategoryMode(true)}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    bulkCategoryMode
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Bulk
+                </button>
+              </div>
+            </div>
+            {!bulkCategoryMode ? (
+              <form onSubmit={handleAddCategory}>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={categoryName}
+                    onChange={(e) => setCategoryName(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter category name (e.g., Ganesha, Home Decor)"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleBulkAddCategories}>
+                <div className="space-y-3">
+                  <textarea
+                    value={bulkCategoryInput}
+                    onChange={(e) => setBulkCategoryInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter multiple categories, one per line or separated by commas&#10;Example:&#10;Ganesha&#10;Home Decor&#10;Wall Hangings"
+                    rows={6}
+                    required
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Add All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBulkCategoryInput("");
+                        setBulkCategoryMode(false);
+                      }}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Enter one category per line or separate by commas. Empty lines will be ignored.
+                  </p>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+        {editingCategory && (
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-lg font-medium mb-3">Edit Category</h3>
+            <form onSubmit={handleUpdateCategory}>
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -308,17 +502,15 @@ const Categories = ({ token }) => {
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  {editingCategory ? "Update" : "Add"}
+                  Update
                 </button>
-                {editingCategory && (
-                  <button
-                    type="button"
-                    onClick={cancelCategoryEdit}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={cancelCategoryEdit}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -379,12 +571,133 @@ const Categories = ({ token }) => {
         </div>
 
         {/* Add/Edit Subcategory Form */}
-        {(showAddSubCategoryForm || editingSubCategory) && (
+        {(showAddSubCategoryForm || editingSubCategory) && !editingSubCategory && (
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-lg font-medium mb-3">
-              {editingSubCategory ? "Edit Subcategory" : "Add New Subcategory"}
-            </h3>
-            <form onSubmit={editingSubCategory ? handleUpdateSubCategory : handleAddSubCategory}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium">Add New Subcategory</h3>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBulkSubCategoryMode(false)}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    !bulkSubCategoryMode
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Single
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBulkSubCategoryMode(true)}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    bulkSubCategoryMode
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Bulk
+                </button>
+              </div>
+            </div>
+            {!bulkSubCategoryMode ? (
+              <form onSubmit={handleAddSubCategory}>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Category *
+                    </label>
+                    <select
+                      value={selectedCategoryForSub}
+                      onChange={(e) => setSelectedCategoryForSub(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    >
+                      <option value="">Choose a category</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={subCategoryName}
+                      onChange={(e) => setSubCategoryName(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Enter subcategory name (e.g., 1X1, 2X2, Small, Large)"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleBulkAddSubCategories}>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Category *
+                    </label>
+                    <select
+                      value={selectedCategoryForSub}
+                      onChange={(e) => setSelectedCategoryForSub(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    >
+                      <option value="">Choose a category</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <textarea
+                    value={bulkSubCategoryInput}
+                    onChange={(e) => setBulkSubCategoryInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Enter multiple subcategories, one per line or separated by commas&#10;Example:&#10;1X1&#10;2X2&#10;Small&#10;Large"
+                    rows={6}
+                    required
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Add All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBulkSubCategoryInput("");
+                        setBulkSubCategoryMode(false);
+                      }}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Enter one subcategory per line or separate by commas. Empty lines will be ignored.
+                  </p>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+        {editingSubCategory && (
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h3 className="text-lg font-medium mb-3">Edit Subcategory</h3>
+            <form onSubmit={handleUpdateSubCategory}>
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -417,17 +730,15 @@ const Categories = ({ token }) => {
                     type="submit"
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
-                    {editingSubCategory ? "Update" : "Add"}
+                    Update
                   </button>
-                  {editingSubCategory && (
-                    <button
-                      type="button"
-                      onClick={cancelSubCategoryEdit}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={cancelSubCategoryEdit}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             </form>
