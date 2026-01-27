@@ -5,9 +5,6 @@ import { ShopContext } from "../context/ShopContext";
 import { IoChatbubbleEllipsesSharp, IoClose } from "react-icons/io5";
 import io from "socket.io-client";
 
-const ENDPOINT = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-const socket = io(ENDPOINT);
-
 const UserChat = () => {
   const { backendUrl, token } = useContext(ShopContext);
   const navigate = useNavigate();
@@ -20,20 +17,43 @@ const UserChat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState(null);
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+
+  // Initialize Socket.IO connection dynamically using backendUrl from context
+  useEffect(() => {
+    if (!backendUrl) return;
+    
+    // Disconnect existing socket if backendUrl changes
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
+    // Create new socket connection with the correct backend URL
+    const socket = io(backendUrl);
+    socketRef.current = socket;
+
+    socket.on("connect", () => console.log("User socket connected to:", backendUrl));
+    socket.on("disconnect", () => console.log("User socket disconnected"));
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [backendUrl]);
 
   useEffect(() => {
-    socket.on("connect", () => console.log("User socket connected"));
-    return () => socket.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      socket.emit("setup", { _id: userId });
+    if (userId && socketRef.current) {
+      socketRef.current.emit("setup", { _id: userId });
       console.log("Socket setup for user:", userId);
     }
   }, [userId]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    
     socket.on("message received", (msg) => {
       if (!chatId || String(msg?.chatId) !== String(chatId)) return;
       setMessages((prev) => {
@@ -53,6 +73,9 @@ const UserChat = () => {
   }, [chatId, isOpen, backendUrl, token]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    
     socket.on("unread update", (data) => {
       if (!data?.chatId || String(data.chatId) !== String(chatId) || isOpen) return;
       if (typeof data.count === "number") {
@@ -65,6 +88,9 @@ const UserChat = () => {
   }, [chatId, isOpen]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
     return () => {
@@ -87,7 +113,9 @@ const UserChat = () => {
           const fetchedUserId = response.data.chat.userId?._id;
           setChatId(fetchedChatId);
           setUserId(fetchedUserId);
-          socket.emit("join chat", String(fetchedChatId));
+          if (socketRef.current) {
+            socketRef.current.emit("join chat", String(fetchedChatId));
+          }
           fetchMessages(fetchedChatId);
           fetchUnreadCount(fetchedChatId);
         }
@@ -106,7 +134,9 @@ const UserChat = () => {
       );
       if (response.data.success) {
         setMessages(response.data.messages);
-        socket.emit("join chat", String(chatIdParam));
+        if (socketRef.current) {
+          socketRef.current.emit("join chat", String(chatIdParam));
+        }
         if (options.markRead) {
           await axios.post(
             `${backendUrl}/api/message/mark-read`,
@@ -146,8 +176,10 @@ const UserChat = () => {
       if (response.data.success) {
         setMessages((prev) => [...prev, response.data.message]);
         setNewMessage("");
-        socket.emit("new Message", response.data);
-        socket.emit("stop typing", String(chatId));
+        if (socketRef.current) {
+          socketRef.current.emit("new Message", response.data);
+          socketRef.current.emit("stop typing", String(chatId));
+        }
       }
     } catch (error) {
       console.error("Message send error:", error.message);
@@ -163,17 +195,19 @@ const UserChat = () => {
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-    if (!socket || !chatId) return;
+    if (!socketRef.current || !chatId) return;
 
     if (!typingTimeout) {
-      socket.emit("typing", String(chatId));
+      socketRef.current.emit("typing", String(chatId));
     }
 
     if (typingTimeout) clearTimeout(typingTimeout);
 
     setTypingTimeout(
       setTimeout(() => {
-        socket.emit("stop typing", String(chatId));
+        if (socketRef.current) {
+          socketRef.current.emit("stop typing", String(chatId));
+        }
         setTypingTimeout(null);
       }, 2000)
     );

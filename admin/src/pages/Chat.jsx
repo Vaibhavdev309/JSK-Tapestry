@@ -4,9 +4,6 @@ import { backendUrl } from "../App";
 import io from "socket.io-client";
 import { useAdminContext } from "../context/AdminContext";
 
-const ENDPOINT = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
-const socket = io(ENDPOINT);
-
 const Chat = ({ token, isAdmin }) => {
   const { refreshCounts } = useAdminContext();
   const [chats, setChats] = useState([]);
@@ -20,6 +17,7 @@ const Chat = ({ token, isAdmin }) => {
   const [typingTimeout, setTypingTimeout] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -27,11 +25,30 @@ const Chat = ({ token, isAdmin }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Initialize Socket.IO connection dynamically using backendUrl
   useEffect(() => {
+    if (!backendUrl) return;
+    
+    // Disconnect existing socket if backendUrl changes
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
+    // Create new socket connection with the correct backend URL
+    const socket = io(backendUrl);
+    socketRef.current = socket;
+
     socket.emit("setup", { _id: "admin" });
-    socket.on("connect", () => console.log("Admin socket connected"));
-    return () => socket.disconnect();
-  }, []);
+    socket.on("connect", () => console.log("Admin socket connected to:", backendUrl));
+    socket.on("disconnect", () => console.log("Admin socket disconnected"));
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [backendUrl]);
 
   useEffect(() => {
     if (!token) return;
@@ -39,6 +56,9 @@ const Chat = ({ token, isAdmin }) => {
   }, [token]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    
     socket.on("message received", (msg) => {
       const msgChatId = msg?.chatId;
       if (selectedChat && String(selectedChat._id) === String(msgChatId)) {
@@ -61,9 +81,12 @@ const Chat = ({ token, isAdmin }) => {
       }
     });
     return () => socket.off("message received");
-  }, [selectedChat, token]);
+  }, [selectedChat, token, backendUrl]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    
     socket.on("unread update", (data) => {
       const dChatId = data?.chatId;
       if (!dChatId) return;
@@ -80,6 +103,9 @@ const Chat = ({ token, isAdmin }) => {
   }, [selectedChat]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
     return () => {
@@ -132,7 +158,9 @@ const Chat = ({ token, isAdmin }) => {
       });
       if (response.data.success) {
         setMessages(response.data.messages);
-        socket.emit("join chat", String(chatId));
+        if (socketRef.current) {
+          socketRef.current.emit("join chat", String(chatId));
+        }
         await axios.post(
           `${backendUrl}/api/message/mark-read`,
           { chatId, isAdmin: true },
@@ -216,8 +244,10 @@ const Chat = ({ token, isAdmin }) => {
       if (response.data.success) {
         setMessages((prev) => [...prev, response.data.message]);
         setNewMessage("");
-        socket.emit("new Message", response.data);
-        socket.emit("stop typing", String(selectedChat._id));
+        if (socketRef.current) {
+          socketRef.current.emit("new Message", response.data);
+          socketRef.current.emit("stop typing", String(selectedChat._id));
+        }
         scrollToBottom();
       }
     } catch (error) {
@@ -227,17 +257,19 @@ const Chat = ({ token, isAdmin }) => {
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-    if (!socket || !selectedChat?._id) return;
+    if (!socketRef.current || !selectedChat?._id) return;
 
     if (!typingTimeout) {
-      socket.emit("typing", String(selectedChat._id));
+      socketRef.current.emit("typing", String(selectedChat._id));
     }
 
     if (typingTimeout) clearTimeout(typingTimeout);
 
     setTypingTimeout(
       setTimeout(() => {
-        socket.emit("stop typing", String(selectedChat._id));
+        if (socketRef.current) {
+          socketRef.current.emit("stop typing", String(selectedChat._id));
+        }
         setTypingTimeout(null);
       }, 2000)
     );
