@@ -277,7 +277,7 @@ const Collection = () => {
               rows.map((row) => (
                 <section key={row} className="card-tapestry p-4 sm:p-6">
                   <h3 className="text-base font-semibold text-stone-800 mb-4 prata-regular border-b border-stone-100 pb-3">{row}</h3>
-                  <div className="grid grid-cols-2 min-[500px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                     {columns
                       .filter((col) =>
                         filterProducts.some((p) =>
