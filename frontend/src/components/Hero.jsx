@@ -6,7 +6,7 @@ const Hero = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-rose-50">
       <div className="flex flex-col py-12 sm:py-16 pt-12 sm:pt-16 lg:pt-0 lg:flex-row lg:pb-0 lg:min-h-[80vh]">
-        <div className="flex flex-col items-start w-full max-w-xl px-4 sm:px-6 mx-auto lg:px-8 lg:max-w-screen-xl lg:justify-center">
+        <div className="flex flex-col items-start w-full max-w-xl px-4 sm:px-6 mx-auto lg:px-8 lg:max-w-screen-xl lg:justify-center lg:w-2/5">
           <div className="mb-12 lg:my-16 lg:max-w-xl lg:pr-6">
             <div className="max-w-xl mb-6">
               <span className="inline-block px-3 py-1.5 mb-4 text-xs font-semibold tracking-wider text-amber-800 uppercase rounded-full bg-amber-200/80">
@@ -39,9 +39,9 @@ const Hero = () => {
             </div>
           </div>
         </div>
-        <div className="relative w-full max-w-xl px-4 sm:px-6 mx-auto lg:pl-8 lg:pr-0 lg:mb-0 lg:mx-0 lg:w-1/2 lg:max-w-none lg:flex lg:items-center lg:justify-end min-w-0">
+        <div className="relative w-full max-w-xl px-4 sm:px-6 mx-auto lg:pl-8 lg:pr-0 lg:mb-0 lg:mx-0 lg:w-3/5 lg:max-w-none lg:flex lg:items-center lg:justify-end min-w-0">
           <img
-            className="object-contain w-full h-auto max-h-[32rem] rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl shadow-xl"
+            className="object-contain w-full h-auto max-h-[40rem] lg:max-h-[45rem] rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl shadow-xl"
             src={HERO_IMAGE}
             alt="Indian handloom tapestries and wall art"
             onError={(e) => {
