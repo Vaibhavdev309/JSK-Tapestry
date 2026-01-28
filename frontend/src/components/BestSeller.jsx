@@ -22,7 +22,6 @@ const BestSeller = () => {
             id={item._id}
             image={item.image}
             name={item.name}
-            variant={index % 2 === 0 ? "default" : "alt"}
           />
         ))}
       </div>

@@ -391,10 +391,10 @@ const Collection = () => {
                 </button>
               </div>
             ) : (
-              rows.map((row, rowIndex) => (
-                <section key={row} className="card-tapestry p-5 sm:p-6">
-                  <h3 className="text-base font-semibold text-stone-800 mb-5 prata-regular border-b border-stone-100 pb-3">{row}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
+              rows.map((row) => (
+                <section key={row} className="card-tapestry p-4 sm:p-5">
+                  <h3 className="text-base font-semibold text-stone-800 mb-4 prata-regular border-b border-stone-100 pb-3">{row}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                     {columns
                       .filter((col) =>
                         filterProducts.some((p) =>
@@ -403,7 +403,7 @@ const Collection = () => {
                             : p.subCategory === row && p.category === col
                         )
                       )
-                      .map((col, colIndex) => {
+                      .map((col) => {
                         const productsInCell = filterProducts.filter((p) =>
                           sortType === "Type"
                             ? p.category === row && p.subCategory === col
@@ -412,17 +412,12 @@ const Collection = () => {
                         const firstProduct = productsInCell[0];
                         const imgSrc = firstProduct?.image?.[0] || PLACEHOLDER_IMG;
                         const name = firstProduct?.name || "Tapestry";
-                        const cardVariant = (rowIndex + colIndex) % 2 === 0 ? "default" : "alt";
 
                         return (
                           <Link
                             key={`${row}-${col}`}
                             to={`/collection/${sortType === "Type" ? row : col}/${sortType === "Type" ? col : row}`}
-                            className={`group block rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 min-w-0 p-3 sm:p-4 ${
-                              cardVariant === "alt"
-                                ? "bg-amber-50/60 border-amber-100 hover:border-amber-200"
-                                : "bg-white border-stone-200 hover:border-stone-300"
-                            }`}
+                            className="group block rounded-xl overflow-hidden border border-stone-200 bg-white shadow-sm hover:shadow-md hover:border-stone-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 min-w-0 p-2 sm:p-3"
                           >
                             <div className="aspect-square bg-stone-100 overflow-hidden">
                               <img
@@ -432,9 +427,9 @@ const Collection = () => {
                                 onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_IMG; }}
                               />
                             </div>
-                            <div className="p-5 text-center">
-                              <p className="text-sm sm:text-base font-medium text-stone-800 tracking-tight leading-snug line-clamp-2 px-1">{name}</p>
-                              <p className="text-xs text-stone-500 mt-2.5">{productsInCell.length} variant{productsInCell.length !== 1 ? "s" : ""}</p>
+                            <div className="p-3 text-center">
+                              <p className="text-sm sm:text-base font-medium text-stone-800 tracking-tight leading-snug line-clamp-2 px-0.5">{name}</p>
+                              <p className="text-xs text-stone-500 mt-1">{productsInCell.length} variant{productsInCell.length !== 1 ? "s" : ""}</p>
                             </div>
                           </Link>
                         );
