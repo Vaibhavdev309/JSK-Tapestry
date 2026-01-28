@@ -427,9 +427,9 @@ const Collection = () => {
                                 onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_IMG; }}
                               />
                             </div>
-                            <div className="p-3">
-                              <p className="text-sm font-medium text-stone-800 truncate">{name}</p>
-                              <p className="text-xs text-stone-500 mt-1">{productsInCell.length} variant{productsInCell.length !== 1 ? "s" : ""}</p>
+                            <div className="p-4 text-center">
+                              <p className="text-sm sm:text-base font-medium text-stone-800 tracking-tight leading-snug line-clamp-2 px-1">{name}</p>
+                              <p className="text-xs text-stone-500 mt-2">{productsInCell.length} variant{productsInCell.length !== 1 ? "s" : ""}</p>
                             </div>
                           </Link>
                         );

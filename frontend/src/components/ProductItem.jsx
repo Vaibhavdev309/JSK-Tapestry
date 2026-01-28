@@ -31,7 +31,7 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
           </div>
         )}
       </div>
-      <p className={`text-stone-800 font-medium truncate ${compact ? "pt-1.5 text-xs" : "pt-3 text-sm"}`}>
+      <p className={`text-stone-800 font-medium text-center tracking-tight leading-snug ${compact ? "pt-2 px-1 text-xs" : "pt-4 px-2 text-sm sm:text-base line-clamp-2"}`}>
         {name || "Tapestry"}
       </p>
     </>
