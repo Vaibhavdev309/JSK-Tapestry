@@ -15,13 +15,15 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { ToastContainer, toast } from "react-toastify";
+import ScrollToTop from "./components/ScrollToTop";
+import { ToastContainer } from "react-toastify";
 import Chat from "./pages/Chat";
 import CategoryProducts from "./components/CategoryProducts";
 
 const App = () => {
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-10">
+      <ScrollToTop />
       <Chat />
       <ToastContainer
         position="bottom-right"
