@@ -121,62 +121,66 @@ const Request = ({ token }) => {
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              {request.items.map((item) => {
-                // Get first image from array, with fallback
-                const productImage = item.productId.image && Array.isArray(item.productId.image) && item.productId.image.length > 0
-                  ? item.productId.image[0]
-                  : (item.productId.image || UPLOAD_AREA_DATA_URI);
-                
-                return (
-                  <div
-                    key={item.productId._id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-2 sm:p-3 hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <div className="flex-shrink-0 self-center sm:self-auto">
-                      <img
-                        src={productImage}
-                        alt={item.productId.name || "Product"}
-                        className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = UPLOAD_AREA_DATA_URI;
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0 text-center sm:text-left">
-                      <h4 className="font-medium text-sm sm:text-base text-gray-800 break-words">{item.productId.name || "Unnamed Product"}</h4>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                        Quantity: <span className="font-medium">{item.quantity}</span>
-                      </p>
-                      {item.productId.price && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          Current: ${item.productId.price}
+              {(request.items || [])
+                .filter((item) => item?.productId != null)
+                .map((item) => {
+                  const product = item.productId;
+                  const img = product?.image;
+                  const productImage =
+                    img && Array.isArray(img) && img.length > 0
+                      ? img[0]
+                      : (typeof img === "string" ? img : UPLOAD_AREA_DATA_URI);
+
+                  return (
+                    <div
+                      key={product._id}
+                      className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-2 sm:p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <div className="flex-shrink-0 self-center sm:self-auto">
+                        <img
+                          src={productImage}
+                          alt={product?.name || "Product"}
+                          className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = UPLOAD_AREA_DATA_URI;
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0 text-center sm:text-left">
+                        <h4 className="font-medium text-sm sm:text-base text-gray-800 break-words">{product?.name || "Unnamed Product"}</h4>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                          Quantity: <span className="font-medium">{item.quantity}</span>
                         </p>
-                      )}
+                        {product?.price != null && product?.price !== "" && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Current: ${product.price}
+                          </p>
+                        )}
+                      </div>
+                      <div className="w-full sm:w-32 flex-shrink-0">
+                        <label className="block text-xs text-gray-600 mb-1">Set Price</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={
+                            prices[`${request._id}-${product._id}`] || ""
+                          }
+                          onChange={(e) =>
+                            handlePriceChange(
+                              request._id,
+                              product._id,
+                              e.target.value
+                            )
+                          }
+                          className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right text-sm"
+                        />
+                      </div>
                     </div>
-                    <div className="w-full sm:w-32 flex-shrink-0">
-                      <label className="block text-xs text-gray-600 mb-1">Set Price</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
-                        value={
-                          prices[`${request._id}-${item.productId._id}`] || ""
-                        }
-                        onChange={(e) =>
-                          handlePriceChange(
-                            request._id,
-                            item.productId._id,
-                            e.target.value
-                          )
-                        }
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right text-sm"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
 
               <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
                 <button
@@ -191,8 +195,8 @@ const Request = ({ token }) => {
                 </button>
                 <button
                   onClick={() => {
-                    const hasPrices = request.items.some(
-                      (item) => prices[`${request._id}-${item.productId._id}`]
+                    const hasPrices = (request.items || []).some(
+                      (item) => item?.productId && prices[`${request._id}-${item.productId._id}`]
                     );
                     if (!hasPrices) {
                       alert("Please set prices for at least one product before approving.");
