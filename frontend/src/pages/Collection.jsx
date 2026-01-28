@@ -31,24 +31,45 @@ const Collection = () => {
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
+  const [pendingCategory, setPendingCategory] = useState([]);
+  const [pendingSubCategory, setPendingSubCategory] = useState([]);
   const [sortType, setSortType] = useState("Size");
 
-  const toggleCategory = (e) => {
+  // When opening the filter dialog, sync pending state from applied filters
+  useEffect(() => {
+    if (showFilter) {
+      setPendingCategory([...category]);
+      setPendingSubCategory([...subCategory]);
+    }
+  }, [showFilter]);
+
+  const togglePendingCategory = (e) => {
     const value = e.target.value;
-    setCategory((prev) =>
+    setPendingCategory((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
         : [...prev, value]
     );
   };
 
-  const toggleSubCategory = (e) => {
+  const togglePendingSubCategory = (e) => {
     const value = e.target.value;
-    setSubCategory((prev) =>
+    setPendingSubCategory((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
         : [...prev, value]
     );
+  };
+
+  const applyFiltersFromDialog = () => {
+    setCategory(pendingCategory);
+    setSubCategory(pendingSubCategory);
+    setShowFilter(false);
+  };
+
+  const clearPendingFilters = () => {
+    setPendingCategory([]);
+    setPendingSubCategory([]);
   };
 
   const applyFilter = () => {
@@ -108,7 +129,7 @@ const Collection = () => {
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 pt-6 sm:pt-8 pb-12 sm:pb-16 px-4 sm:px-6 max-w-7xl mx-auto min-w-0">
         {/* Filters Sidebar */}
         <aside
-          className={`lg:w-72 shrink-0 ${
+          className={`lg:w-80 shrink-0 ${
             showFilter ? "fixed inset-0 z-40 lg:relative lg:block" : "hidden lg:block"
           }`}
         >
@@ -116,28 +137,43 @@ const Collection = () => {
             {/* Mobile backdrop */}
             {showFilter && (
               <div
-                className="fixed inset-0 bg-stone-900/40 z-[-1] lg:hidden"
+                className="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-[-1] lg:hidden transition-opacity"
                 onClick={() => setShowFilter(false)}
                 aria-hidden="true"
               />
             )}
-            <div className="bg-white rounded-2xl border border-stone-200 shadow-soft lg:shadow-card p-5 max-h-[85vh] overflow-y-auto lg:max-h-[calc(100vh-7rem)]">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-semibold text-stone-800">Filters</h2>
-                <div className="flex items-center gap-2">
-                  {hasActiveFilters && (
+            <div className="bg-white rounded-2xl border border-stone-200/80 shadow-lg shadow-stone-200/50 lg:shadow-md p-0 max-h-[88vh] overflow-hidden flex flex-col lg:max-h-[calc(100vh-7rem)]">
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 bg-stone-50/50 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-amber-100 text-amber-700">
+                    <FilterIcon />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-stone-800 tracking-tight">Refine results</h2>
+                    {(pendingCategory.length > 0 || pendingSubCategory.length > 0) ? (
+                      <p className="text-xs text-stone-500 mt-0.5">
+                        {pendingCategory.length + pendingSubCategory.length} selected
+                      </p>
+                    ) : (
+                      <p className="text-xs text-stone-500 mt-0.5">Category & size</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {(pendingCategory.length > 0 || pendingSubCategory.length > 0) && (
                     <button
                       type="button"
-                      onClick={clearFilters}
-                      className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+                      onClick={clearPendingFilters}
+                      className="text-xs font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 px-2.5 py-1.5 rounded-lg transition-colors"
                     >
-                      Clear
+                      Clear all
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => setShowFilter(false)}
-                    className="lg:hidden p-2 -m-2 rounded-lg hover:bg-stone-100 text-stone-500"
+                    className="p-2 rounded-lg hover:bg-stone-200/60 text-stone-500 hover:text-stone-700 transition-colors lg:hidden"
                     aria-label="Close filters"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -145,41 +181,82 @@ const Collection = () => {
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div>
-                  <h3 className="text-sm font-semibold text-stone-800 mb-3">Category</h3>
-                  <div className="space-y-2">
-                    {typeOrder.map((type) => (
-                      <label key={type} className="flex items-center gap-3 text-sm text-stone-600 hover:text-stone-900 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          value={type}
-                          checked={category.includes(type)}
-                          onChange={toggleCategory}
-                          className="w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 focus:ring-offset-0"
-                        />
-                        <span>{type}</span>
-                      </label>
-                    ))}
+              {/* Filter sections - scrollable */}
+              <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 space-y-6">
+                <section>
+                  <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-1 h-3 rounded-full bg-amber-500" aria-hidden />
+                    <span>Category</span>
+                  </h3>
+                  <div className="space-y-0.5 rounded-xl bg-stone-50/80 p-1 border border-stone-100">
+                    {typeOrder.map((type) => {
+                      const isChecked = pendingCategory.includes(type);
+                      return (
+                        <label
+                          key={type}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                            isChecked ? "bg-white text-stone-900 shadow-sm border border-stone-200/80" : "text-stone-600 hover:bg-white/60 hover:text-stone-800"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            value={type}
+                            checked={isChecked}
+                            onChange={togglePendingCategory}
+                            className="w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-2 focus:ring-amber-500/40 focus:ring-offset-0"
+                          />
+                          <span className="text-sm font-medium">{type}</span>
+                        </label>
+                      );
+                    })}
                   </div>
-                </div>
-                <div className="border-t border-stone-100 pt-5">
-                  <h3 className="text-sm font-semibold text-stone-800 mb-3">Size</h3>
-                  <div className="space-y-2">
-                    {sizeOrder.map((size) => (
-                      <label key={size} className="flex items-center gap-3 text-sm text-stone-600 hover:text-stone-900 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          value={size}
-                          checked={subCategory.includes(size)}
-                          onChange={toggleSubCategory}
-                          className="w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 focus:ring-offset-0"
-                        />
-                        <span>{size}</span>
-                      </label>
-                    ))}
+                </section>
+                <section>
+                  <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-1 h-3 rounded-full bg-amber-500" aria-hidden />
+                    <span>Size</span>
+                  </h3>
+                  <div className="space-y-0.5 rounded-xl bg-stone-50/80 p-1 border border-stone-100">
+                    {sizeOrder.map((size) => {
+                      const isChecked = pendingSubCategory.includes(size);
+                      return (
+                        <label
+                          key={size}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                            isChecked ? "bg-white text-stone-900 shadow-sm border border-stone-200/80" : "text-stone-600 hover:bg-white/60 hover:text-stone-800"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            value={size}
+                            checked={isChecked}
+                            onChange={togglePendingSubCategory}
+                            className="w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-2 focus:ring-amber-500/40 focus:ring-offset-0"
+                          />
+                          <span className="text-sm font-medium">{size}</span>
+                        </label>
+                      );
+                    })}
                   </div>
-                </div>
+                </section>
+              </div>
+
+              {/* Footer with Apply */}
+              <div className="shrink-0 px-5 py-4 border-t border-stone-100 bg-stone-50/30 space-y-2">
+                <button
+                  type="button"
+                  onClick={applyFiltersFromDialog}
+                  className="w-full py-3 px-4 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:scale-[0.99]"
+                >
+                  Apply filters
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFilter(false)}
+                  className="w-full py-2.5 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors lg:hidden"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
@@ -306,7 +383,7 @@ const Collection = () => {
                               <img
                                 src={imgSrc}
                                 alt={name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                                 onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_IMG; }}
                               />
                             </div>

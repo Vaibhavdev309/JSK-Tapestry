@@ -12,7 +12,7 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
       <div className="overflow-hidden rounded-xl bg-stone-100">
         {img ? (
           <img
-            className={`object-cover object-center w-full max-w-full transition-transform duration-300 hover:scale-105 ${
+            className={`object-contain object-center w-full max-w-full transition-transform duration-300 hover:scale-105 ${
               compact ? "aspect-square w-full" : "h-48 sm:h-56 md:h-60"
             }`}
             src={img}
