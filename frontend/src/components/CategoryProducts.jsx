@@ -88,11 +88,11 @@ const CategoryProducts = () => {
         prevProductIdRef.current = productId;
       } else if (filteredProducts.length > 0) {
         console.log("⚠️ Product not found, navigating to first product");
-        navigate(`/collection/${category}/${subCategory}/${filteredProducts[0]._id}`);
+        navigate(`/collection/${category}/${subCategory}/${filteredProducts[0]._id}`, { replace: true });
       }
     } else if (filteredProducts.length > 0) {
       console.log("⚠️ No productId, navigating to first product");
-      navigate(`/collection/${category}/${subCategory}/${filteredProducts[0]._id}`);
+      navigate(`/collection/${category}/${subCategory}/${filteredProducts[0]._id}`, { replace: true });
     }
   }, [productId, category, subCategory, navigate, products]); // Use products instead of filteredProducts
 
@@ -485,11 +485,24 @@ const CategoryProducts = () => {
 
         {/* Back */}
         <div className="mt-10 pt-6 border-t border-stone-200">
-          <Link
-            to="/collection"
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate("/collection");
+              }
+            }}
             className="inline-flex items-center gap-1.5 text-stone-500 hover:text-amber-600 font-medium text-sm transition-colors"
           >
-            <span aria-hidden>←</span> Back to collection
+            <span aria-hidden>←</span> Back
+          </button>
+          <Link
+            to="/collection"
+            className="ml-4 inline-flex items-center gap-1.5 text-stone-500 hover:text-amber-600 font-medium text-sm transition-colors"
+          >
+            Collection
           </Link>
         </div>
       </div>
