@@ -62,13 +62,40 @@
   }
 }
 
-/* ----- React Toastify: match Tapestry theme ----- */
+/* ----- React Toastify: bottom-right, Tapestry theme ----- */
 .Toastify__toast-container {
   font-family: "Outfit", system-ui, sans-serif;
+  position: fixed;
+  width: calc(100% - 2rem);
+  max-width: 22rem;
+  padding: 0;
+  z-index: 9999;
+}
+
+.Toastify__toast-container--bottom-right {
+  bottom: 1rem;
+  right: 1rem;
+  left: auto;
+  top: auto;
 }
 
 .Toastify__toast {
-  @apply rounded-xl shadow-soft border border-stone-100;
+  @apply rounded-xl border shadow-lg;
+  padding: 0.875rem 1rem;
+  min-height: auto;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}
+
+.Toastify__toast-body {
+  padding: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.Toastify__progress-bar {
+  height: 3px;
+  border-radius: 0 0 0.75rem 0.75rem;
 }
 
 /* ----- Mobile Menu Animations ----- */
@@ -114,21 +141,47 @@
 }
 
 .Toastify__toast--success {
-  @apply bg-white text-stone-800;
+  @apply bg-white text-stone-800 border-amber-200;
+  border-left-width: 4px;
+  border-left-color: rgb(217 119 6); /* amber-600 */
 }
 
 .Toastify__toast--error {
-  @apply bg-white text-stone-800;
+  @apply bg-white text-stone-800 border-stone-200;
+  border-left-width: 4px;
+  border-left-color: rgb(185 28 28); /* red-700 */
 }
 
 .Toastify__toast--info {
-  @apply bg-white text-stone-800;
+  @apply bg-white text-stone-800 border-stone-200;
+  border-left-width: 4px;
+  border-left-color: rgb(120 113 108); /* stone-500 */
+}
+
+.Toastify__toast--warning {
+  @apply bg-white text-stone-800 border-amber-200;
+  border-left-width: 4px;
+  border-left-color: rgb(245 158 11); /* amber-500 */
 }
 
 .Toastify__progress-bar--success {
-  @apply bg-amber-500;
+  background: linear-gradient(90deg, rgb(217 119 6), rgb(245 158 11));
 }
 
 .Toastify__progress-bar--error {
   @apply bg-rose-500;
+}
+
+.Toastify__progress-bar--info,
+.Toastify__progress-bar--warning {
+  @apply bg-amber-500;
+}
+
+.Toastify__close-button {
+  opacity: 0.6;
+  align-self: flex-start;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
 }

@@ -23,7 +23,18 @@ const App = () => {
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-10">
       <Chat />
-      <ToastContainer />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />

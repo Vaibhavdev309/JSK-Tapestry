@@ -3,9 +3,14 @@ import { Link } from "react-router-dom";
 
 const FALLBACK_IMG = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect fill="#e7e5e4" width="120" height="120"/></svg>');
 
-const ProductItem = ({ id, _id, image, name, compact }) => {
+const ProductItem = ({ id, _id, image, name, compact, variant = "default" }) => {
   const productId = id || _id;
   const img = image?.[0];
+
+  const cardBg =
+    variant === "alt"
+      ? "bg-amber-50/60 border-amber-100 hover:border-amber-200"
+      : "bg-white border-stone-200 hover:border-stone-300";
 
   const content = (
     <>
@@ -31,7 +36,7 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
           </div>
         )}
       </div>
-      <p className={`text-stone-800 font-medium text-center tracking-tight leading-snug ${compact ? "pt-2 px-1 text-xs" : "pt-4 px-2 text-sm sm:text-base line-clamp-2"}`}>
+      <p className={`text-stone-800 font-medium text-center tracking-tight leading-snug ${compact ? "pt-2.5 px-1 text-xs" : "pt-5 px-3 text-sm sm:text-base line-clamp-2"}`}>
         {name || "Tapestry"}
       </p>
     </>
@@ -44,7 +49,7 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
   return (
     <Link
       to={`/collection/${productId}`}
-      className="block text-stone-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 min-w-0"
+      className={`block text-stone-700 rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 min-w-0 p-3 sm:p-4 ${cardBg}`}
     >
       {content}
     </Link>
