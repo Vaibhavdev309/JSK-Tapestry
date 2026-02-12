@@ -219,6 +219,123 @@ export const sendContactNotificationEmail = async (contact) => {
   }
 };
 
+// Recipients for price-request and chat notifications (high interaction)
+const NOTIFICATION_EMAILS = [
+  "vaibhav.dev.309@gmail.com",
+  "swapnilmauryavidhay@gmail.com",
+];
+
+const createTransporterSafe = () => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    return null;
+  }
+  return createTransporter();
+};
+
+// Send notification when a new price approval request is created
+export const sendPriceRequestNotificationEmail = async (priceRequest) => {
+  try {
+    const transporter = createTransporterSafe();
+    if (!transporter) {
+      console.warn("⚠️ [EMAIL] Skipping price request notification - email not configured");
+      return { success: false };
+    }
+
+    const user = priceRequest.userId;
+    const userName = user?.name || "A customer";
+    const userEmail = user?.email || "—";
+    const itemsList = (priceRequest.items || [])
+      .map((i) => {
+        const name = i.productId?.name || "Product";
+        return `• ${name} (Qty: ${i.quantity || 1}, Size: ${i.size || "—"})`;
+      })
+      .join("<br>");
+
+    const mailOptions = {
+      from: `"JSK Handloom" <${process.env.EMAIL_USER}>`,
+      to: NOTIFICATION_EMAILS.join(", "),
+      subject: `🔔 New Price Approval Request – JSK Handloom`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%); padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 22px;">New Price Approval Request</h1>
+          </div>
+          <div style="background: #fff; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <p><strong>Customer:</strong> ${userName}</p>
+            <p><strong>Email:</strong> <a href="mailto:${userEmail}">${userEmail}</a></p>
+            <p><strong>Request ID:</strong> ${priceRequest._id}</p>
+            <p><strong>Items requested:</strong></p>
+            <div style="background: #f3f4f6; padding: 12px; border-radius: 6px; margin: 8px 0;">${itemsList || "—"}</div>
+            <p style="font-size: 12px; color: #6b7280;">${new Date().toLocaleString()}</p>
+            <p style="font-size: 12px; color: #9ca3af;">Log in to the admin panel to respond.</p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `New Price Approval Request\n\nCustomer: ${userName}\nEmail: ${userEmail}\nRequest ID: ${priceRequest._id}\n\nItems:\n${(priceRequest.items || []).map((i) => `- ${i.productId?.name || "Product"} (Qty: ${i.quantity || 1}, Size: ${i.size || "—"})`).join("\n")}\n\n${new Date().toLocaleString()}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Price request notification sent to", NOTIFICATION_EMAILS.length, "recipients");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ [EMAIL] Price request notification failed:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+// Send notification when a customer sends a chat message
+export const sendChatMessageNotificationEmail = async ({ userName, userEmail, content, chatId }) => {
+  try {
+    const transporter = createTransporterSafe();
+    if (!transporter) {
+      console.warn("⚠️ [EMAIL] Skipping chat notification - email not configured");
+      return { success: false };
+    }
+
+    const escapeHtml = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const safeContent = escapeHtml((content || "").slice(0, 500));
+    const displayName = escapeHtml(userName || "A customer");
+    const safeEmail = escapeHtml(userEmail || "");
+
+    const mailOptions = {
+      from: `"JSK Handloom Chat" <${process.env.EMAIL_USER}>`,
+      to: NOTIFICATION_EMAILS.join(", "),
+      subject: `💬 New Chat Message – JSK Handloom`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 22px;">New Chat Message</h1>
+          </div>
+          <div style="background: #fff; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <p><strong>From:</strong> ${displayName}</p>
+            <p><strong>Email:</strong> <a href="mailto:${userEmail || ""}">${safeEmail || "—"}</a></p>
+            <p><strong>Message:</strong></p>
+            <div style="background: #f3f4f6; padding: 12px; border-radius: 6px; white-space: pre-wrap;">${safeContent}</div>
+            <p style="font-size: 12px; color: #6b7280;">${new Date().toLocaleString()} · Chat ID: ${chatId}</p>
+            <p style="font-size: 12px; color: #9ca3af;">Reply from the admin panel chat.</p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `New Chat Message\n\nFrom: ${displayName}\nEmail: ${userEmail || "—"}\n\nMessage:\n${safeContent}\n\n${new Date().toLocaleString()} · Chat ID: ${chatId}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Chat message notification sent to", NOTIFICATION_EMAILS.length, "recipients");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ [EMAIL] Chat message notification failed:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 // Send password reset email (for future use)
 export const sendPasswordResetEmail = async (email, name, resetToken) => {
   try {

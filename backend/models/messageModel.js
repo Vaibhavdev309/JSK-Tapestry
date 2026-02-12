@@ -7,7 +7,7 @@ const messageSchema = new mongoose.Schema(
       ref: "Chat",
       required: true,
     }, // Reference to the chat
-    sender: { type: String, enum: ["user", "admin"], required: true }, // Indicates whether the sender is a user or admin
+    sender: { type: String, enum: ["user", "admin", "bot"], required: true }, // user, admin, or bot (auto-replies)
     content: { type: String, required: true }, // Message content
     read: { type: Boolean, default: false },
   },

@@ -32,6 +32,12 @@ const Cart = () => {
   const [cartData, setCartData] = useState([]);
   const [priceRequests, setPriceRequests] = useState([]);
   const [activeRequest, setActiveRequest] = useState(null);
+  const [showMobileModal, setShowMobileModal] = useState(false);
+  const [mobilePhone, setMobilePhone] = useState("");
+  const [mobileOtp, setMobileOtp] = useState("");
+  const [mobileStep, setMobileStep] = useState("phone");
+  const [mobileLoading, setMobileLoading] = useState(false);
+  const [pendingPriceItems, setPendingPriceItems] = useState(null);
 
   useEffect(() => {
     const tempData = [];
@@ -70,6 +76,15 @@ const Cart = () => {
     if (token) fetchUserRequests();
   }, [token, backendUrl]);
 
+  const submitPriceRequest = async (items) => {
+    const response = await axios.post(
+      `${backendUrl}/api/price-requests/create`,
+      { items },
+      { headers: { token } }
+    );
+    return response.data;
+  };
+
   const handleRequestToAdmin = async () => {
     const items = cartData.map((item) => ({
       productId: item._id,
@@ -78,18 +93,27 @@ const Cart = () => {
     }));
 
     try {
-      const response = await axios.post(
-        `${backendUrl}/api/price-requests/create`,
-        { items },
-        { headers: { token } }
-      );
-
-      if (response.data.success) {
-        setPriceRequests([response.data.priceRequest, ...priceRequests]);
+      const data = await submitPriceRequest(items);
+      if (data.success) {
+        setPriceRequests([data.priceRequest, ...priceRequests]);
         toast.success("Price request submitted to admin");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error submitting request");
+      if (error.response?.status === 400 && error.response?.data?.requiresMobile) {
+        setPendingPriceItems(items);
+        try {
+          const profileRes = await axios.get(`${backendUrl}/api/user/profile`, { headers: { token } });
+          const p = profileRes.data?.user?.phone || "";
+          setMobilePhone(p);
+        } catch (_) {
+          setMobilePhone("");
+        }
+        setMobileStep("phone");
+        setMobileOtp("");
+        setShowMobileModal(true);
+      } else {
+        toast.error(error.response?.data?.message || "Error submitting request");
+      }
     }
   };
 
@@ -116,26 +140,91 @@ const Cart = () => {
   };
 
   const handleResubmitRequest = async (requestId) => {
+    const originalRequest = priceRequests.find((req) => req._id === requestId);
+    if (!originalRequest) return;
+    const items = originalRequest.items?.map((i) => ({
+      productId: i.productId?._id || i.productId,
+      quantity: i.quantity,
+      size: i.size,
+    })).filter((i) => i.productId);
+
     try {
-      const originalRequest = priceRequests.find(
-        (req) => req._id === requestId
-      );
-      if (!originalRequest) return;
-
-      const response = await axios.post(
-        `${backendUrl}/api/price-requests/create`,
-        { items: originalRequest.items },
-        { headers: { token } }
-      );
-
-      if (response.data.success) {
-        setPriceRequests([response.data.priceRequest, ...priceRequests]);
+      const data = await submitPriceRequest(items);
+      if (data.success) {
+        setPriceRequests([data.priceRequest, ...priceRequests]);
         toast.success("Request resubmitted successfully");
       }
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Error resubmitting request"
+      if (error.response?.status === 400 && error.response?.data?.requiresMobile) {
+        setPendingPriceItems(items);
+        try {
+          const profileRes = await axios.get(`${backendUrl}/api/user/profile`, { headers: { token } });
+          const p = profileRes.data?.user?.phone || "";
+          setMobilePhone(p);
+        } catch (_) {
+          setMobilePhone("");
+        }
+        setMobileStep("phone");
+        setMobileOtp("");
+        setShowMobileModal(true);
+      } else {
+        toast.error(error.response?.data?.message || "Error resubmitting request");
+      }
+    }
+  };
+
+  const handleSendMobileOtp = async () => {
+    const num = mobilePhone.replace(/\D/g, "").slice(0, 10);
+    if (num.length !== 10) {
+      toast.error("Enter a valid 10-digit mobile number");
+      return;
+    }
+    setMobileLoading(true);
+    try {
+      await axios.post(
+        `${backendUrl}/api/user/send-phone-otp`,
+        { phone: num },
+        { headers: { token } }
       );
+      toast.success("OTP sent to your mobile");
+      setMobileStep("otp");
+      setMobileOtp("");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setMobileLoading(false);
+    }
+  };
+
+  const handleVerifyMobileOtp = async () => {
+    if (!mobileOtp.trim() || mobileOtp.replace(/\D/g, "").length !== 6) {
+      toast.error("Enter the 6-digit OTP");
+      return;
+    }
+    setMobileLoading(true);
+    try {
+      await axios.post(
+        `${backendUrl}/api/user/verify-phone-otp`,
+        { otp: mobileOtp.trim() },
+        { headers: { token } }
+      );
+      toast.success("Mobile number verified");
+      setShowMobileModal(false);
+      setMobileStep("phone");
+      setMobileOtp("");
+      setMobilePhone("");
+      if (pendingPriceItems && pendingPriceItems.length > 0) {
+        const data = await submitPriceRequest(pendingPriceItems);
+        if (data.success) {
+          setPriceRequests([data.priceRequest, ...priceRequests]);
+          toast.success("Price request submitted to admin");
+        }
+        setPendingPriceItems(null);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Verification failed");
+    } finally {
+      setMobileLoading(false);
     }
   };
 
@@ -388,6 +477,60 @@ const Cart = () => {
             </button>
           </div>
         </section>
+      )}
+
+      {/* Add & verify mobile modal (required for price approval) */}
+      {showMobileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50" role="dialog" aria-modal="true" aria-labelledby="mobile-modal-title">
+          <div className="card-tapestry w-full max-w-sm p-6 shadow-xl">
+            <h2 id="mobile-modal-title" className="text-lg font-semibold text-stone-900 mb-1">Verify mobile number</h2>
+            <p className="text-stone-500 text-sm mb-5">Price approval requires a verified mobile number. Add your number and verify with OTP.</p>
+            {mobileStep === "phone" ? (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="cart-mobile" className="sr-only">Mobile number</label>
+                  <input
+                    id="cart-mobile"
+                    type="tel"
+                    value={mobilePhone}
+                    onChange={(e) => setMobilePhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    className="input-tapestry"
+                    placeholder="10-digit mobile number"
+                    maxLength={10}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => { setShowMobileModal(false); setPendingPriceItems(null); }} className="btn-secondary flex-1">Cancel</button>
+                  <button type="button" onClick={handleSendMobileOtp} disabled={mobileLoading} className="btn-primary flex-1">
+                    {mobileLoading ? <span className="inline-block w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : "Send OTP"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="cart-otp" className="sr-only">OTP</label>
+                  <input
+                    id="cart-otp"
+                    type="text"
+                    inputMode="numeric"
+                    value={mobileOtp}
+                    onChange={(e) => setMobileOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="input-tapestry"
+                    placeholder="Enter 6-digit OTP"
+                    maxLength={6}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setMobileStep("phone")} className="btn-secondary flex-1">Change number</button>
+                  <button type="button" onClick={handleVerifyMobileOtp} disabled={mobileLoading} className="btn-primary flex-1">
+                    {mobileLoading ? <span className="inline-block w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : "Verify"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </main>
   );

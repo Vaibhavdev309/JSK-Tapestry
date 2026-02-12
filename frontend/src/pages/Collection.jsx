@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
+import CustomBulkBanner from "../components/CustomBulkBanner";
 import { SearchIcon, CrossIcon } from "../utils/icons.jsx";
 
 const PLACEHOLDER_IMG = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#e7e5e4" width="200" height="200"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#a8a29e" font-size="12" font-family="system-ui">No image</text></svg>');
@@ -149,6 +150,7 @@ const Collection = () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-stone-50/80 to-white">
       <div className="flex flex-col gap-4 sm:gap-6 pt-6 sm:pt-8 pb-12 sm:pb-16 px-4 sm:px-6 max-w-7xl mx-auto min-w-0">
+        <CustomBulkBanner compact />
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {/* Search Bar */}

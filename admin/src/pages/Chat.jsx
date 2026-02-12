@@ -420,10 +420,15 @@ const Chat = ({ token, isAdmin }) => {
                         className={`max-w-[85%] sm:max-w-[75%] md:max-w-md px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl ${
                           msg.sender === "admin"
                             ? "bg-blue-600 text-white rounded-br-md"
-                            : "bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm"
+                            : msg.sender === "bot"
+                              ? "bg-emerald-50 text-gray-800 border border-emerald-200 rounded-bl-md shadow-sm"
+                              : "bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm"
                         }`}
                       >
-                        <p className="text-xs sm:text-sm break-words">{msg.content}</p>
+                        {msg.sender === "bot" && (
+                          <p className="text-[10px] font-semibold text-emerald-600 mb-0.5">Support Bot</p>
+                        )}
+                        <p className="text-xs sm:text-sm break-words whitespace-pre-line">{msg.content}</p>
                         <p className={`text-[10px] sm:text-xs mt-1 ${msg.sender === "admin" ? "text-blue-100" : "text-gray-400"}`}>
                           {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
                         </p>

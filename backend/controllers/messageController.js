@@ -1,5 +1,7 @@
 import messageModel from "../models/messageModel.js";
 import chatModel from "../models/chatModel.js";
+import { getBotReply } from "../utils/chatBot.js";
+import { sendChatMessageNotificationEmail } from "../utils/emailService.js";
 
 const sendMessage = async (req, res) => {
   try {
@@ -29,7 +31,38 @@ const sendMessage = async (req, res) => {
     chat.updatedAt = Date.now();
     await chat.save();
 
-    res.json({ success: true, message: newMessage });
+    if (!isAdmin) {
+      const chatWithUser = await chatModel.findById(chatId).populate("userId", "name email");
+      const user = chatWithUser?.userId;
+      sendChatMessageNotificationEmail({
+        userName: user?.name,
+        userEmail: user?.email,
+        content,
+        chatId: String(chatId),
+      }).catch((err) => console.error("Chat notification email error:", err?.message));
+    }
+
+    let botReplyMessage = null;
+    if (!isAdmin) {
+      const botText = getBotReply(content);
+      if (botText) {
+        botReplyMessage = await messageModel.create({
+          chatId,
+          content: botText,
+          sender: "bot",
+          read: true,
+        });
+        chat.latestMessage = botReplyMessage._id;
+        chat.updatedAt = Date.now();
+        await chat.save();
+      }
+    }
+
+    res.json({
+      success: true,
+      message: newMessage,
+      ...(botReplyMessage && { botReply: botReplyMessage }),
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ success: false, message: error.message });

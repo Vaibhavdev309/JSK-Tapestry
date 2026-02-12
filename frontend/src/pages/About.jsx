@@ -16,7 +16,7 @@ const About = () => {
               Weaving heritage into every home
             </h1>
             <p className="text-stone-600 text-lg leading-relaxed mb-6">
-              Tapestry grew from a simple idea: to bring authentic Indian handloom wall art and tapestries to people who value craftsmanship and tradition. Each piece we curate tells a story—of weavers, motifs, and the rich culture they come from.
+              JSK Handloom grew from a simple idea: to bring authentic Indian handloom wall art and tapestries to people who value craftsmanship and tradition. Each piece we curate tells a story—of weavers, motifs, and the rich culture they come from.
             </p>
             <Link
               to="/collection"
@@ -28,7 +28,7 @@ const About = () => {
           <div className="lg:w-1/2 order-1 lg:order-2">
             <img
               src={ABOUT_IMAGE}
-              alt="Indian handloom and tapestries"
+              alt="JSK Handloom handloom tapestries"
               className="w-full rounded-2xl shadow-xl object-cover aspect-[4/3] lg:aspect-auto lg:max-h-[420px]"
               onError={(e) => {
                 e.target.onerror = null;
@@ -115,7 +115,7 @@ const About = () => {
             Ready to find your piece?
           </h2>
           <p className="text-stone-600 mb-6 max-w-lg mx-auto">
-            Browse our collection of tapestries—from divine art and festivals to nature and stories—and bring a touch of Indian heritage home.
+            Browse JSK Handloom’s collection—from divine art and festivals to nature and stories—and bring a touch of Indian heritage home.
           </p>
           <Link
             to="/collection"

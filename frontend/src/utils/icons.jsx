@@ -53,7 +53,7 @@ export const Logo = ({ className = "w-24 sm:w-28 md:w-32 lg:w-36 h-auto max-h-10
     // Fallback to text logo if image fails
     return (
       <div className={`${className} flex items-center justify-center font-bold text-xl sm:text-2xl text-amber-600`}>
-        Tapestry
+        JSK Handloom
       </div>
     );
   }
@@ -61,7 +61,7 @@ export const Logo = ({ className = "w-24 sm:w-28 md:w-32 lg:w-36 h-auto max-h-10
   return (
     <img 
       src={LOGO_URL} 
-      alt="Tapestry" 
+      alt="JSK Handloom" 
       className={className}
       onError={() => setImgError(true)}
     />

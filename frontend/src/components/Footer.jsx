@@ -7,14 +7,14 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16">
         <div className="grid gap-8 sm:gap-10 row-gap-6 mb-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2">
-            <Link to="/" aria-label="Tapestry home" className="inline-flex items-center gap-2">
+            <Link to="/" aria-label="JSK Handloom home" className="inline-flex items-center gap-2">
               <span className="text-2xl font-bold tracking-wide text-amber-400 uppercase prata-regular">
-                Tapestry
+                JSK Handloom
               </span>
             </Link>
             <div className="mt-6 lg:max-w-sm">
               <p className="text-sm text-stone-400 leading-relaxed">
-                We curate authentic Indian handloom tapestries and wall art—from divine and festive motifs to nature and folklore. Each piece is chosen for quality and craftsmanship.
+                Authentic handloom tapestries and wall hangings—divine, festive, and nature-inspired designs. Each piece is chosen for quality and craftsmanship.
               </p>
               <p className="mt-4 text-sm text-stone-400 leading-relaxed">
                 Handcrafted in India, delivered with care to your door.
@@ -25,42 +25,39 @@ const Footer = () => {
             <p className="text-base font-bold tracking-wide text-stone-100">Contact</p>
             <div className="flex flex-col gap-1">
               <span className="text-stone-400">Phone:</span>
-              <a href="tel:+91-XXXX-XXX-XXX" aria-label="Phone" className="transition-colors text-amber-400 hover:text-amber-300">
-                +91 XXXXX XXXXX
+              <a href="tel:+919305058581" aria-label="Phone" className="transition-colors text-amber-400 hover:text-amber-300">
+                +91 9305058581
               </a>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-stone-400">Email:</span>
-              <a href="mailto:hello@tapestry.in" aria-label="Email" className="transition-colors text-amber-400 hover:text-amber-300">
-                hello@tapestry.in
+              <a href="mailto:swapnilmauryavidhay@gmail.com" aria-label="Email" className="transition-colors text-amber-400 hover:text-amber-300">
+                swapnilmauryavidhay@gmail.com
               </a>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-stone-400">Address:</span>
-              <span className="text-stone-400">India</span>
+              <span className="text-stone-400">Bhawanipur Shivpur, Varanasi, Uttar Pradesh, India – 221003</span>
             </div>
           </div>
           <div>
             <p className="text-base font-bold tracking-wide text-stone-100">Connect</p>
             <div className="flex items-center mt-3 gap-4">
-              <a href="#" className="text-stone-400 transition-colors hover:text-amber-400" aria-label="Instagram">
+              <a href="https://wa.me/919305058581" target="_blank" rel="noopener noreferrer" className="text-stone-400 transition-colors hover:text-amber-400" aria-label="WhatsApp">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </a>
+              <a href="https://www.instagram.com/jsk.handloom" target="_blank" rel="noopener noreferrer" className="text-stone-400 transition-colors hover:text-amber-400" aria-label="Instagram">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              </a>
-              <a href="#" className="text-stone-400 transition-colors hover:text-amber-400" aria-label="Facebook">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 0H2C.895 0 0 .895 0 2v20c0 1.105.895 2 2 2h11v-9h-3v-4h3V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763V11h4.44l-1 4h-3.44v9H22c1.105 0 2-.895 2-2V2c0-1.105-.895-2-2-2z"/></svg>
-              </a>
-              <a href="#" className="text-stone-400 transition-colors hover:text-amber-400" aria-label="Pinterest">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
               </a>
             </div>
             <p className="mt-4 text-sm text-stone-500">
-              Follow us for new arrivals and weaving stories.
+              Follow @jsk.handloom for new arrivals and weaving stories.
             </p>
           </div>
         </div>
         <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-4 pt-6 sm:pt-8 pb-8 sm:pb-10 border-t border-stone-700">
           <p className="text-sm text-stone-500 order-2 sm:order-1">
-            © {new Date().getFullYear()} Tapestry. All rights reserved.
+            © {new Date().getFullYear()} JSK Handloom. All rights reserved.
           </p>
           <ul className="flex flex-wrap gap-3 sm:gap-6 mb-0">
             <li>
@@ -68,6 +65,9 @@ const Footer = () => {
             </li>
             <li>
               <Link to="/contact" className="text-sm text-stone-500 transition-colors hover:text-amber-400">Contact</Link>
+            </li>
+            <li>
+              <Link to="/faq" className="text-sm text-stone-500 transition-colors hover:text-amber-400">FAQ</Link>
             </li>
             <li>
               <a href="#" className="text-sm text-stone-500 transition-colors hover:text-amber-400">Privacy Policy</a>

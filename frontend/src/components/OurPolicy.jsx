@@ -4,10 +4,10 @@ const OurPolicy = () => {
   return (
     <section className="max-w-6xl mx-auto px-4 py-16 lg:py-20">
       <h2 className="text-stone-800 text-3xl sm:text-4xl font-extrabold text-center mb-4">
-        Why Choose Tapestry
+        Why Choose JSK Handloom
       </h2>
       <p className="text-stone-500 text-center mb-12 max-w-2xl mx-auto">
-        We bring you authentic handloom tapestries with a promise of quality, care, and support.
+        We bring you authentic handloom tapestries with a promise of quality, care, and support. Every piece is chosen with care for your home.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-2xl sm:max-w-none mx-auto">

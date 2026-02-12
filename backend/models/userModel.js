@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: false }, // omitted for Google-only users
     googleId: { type: String, required: false, sparse: true, unique: true },
     phone: { type: String, required: false },
+    phoneVerified: { type: Boolean, default: false },
+    phoneOtp: { type: String, required: false },
+    phoneOtpExpires: { type: Date, required: false },
     cartData: { type: Object, default: {} },
     addresses: [addressSchema],
     // Email verification fields

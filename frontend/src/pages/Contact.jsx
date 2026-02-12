@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { ShopContext } from "../context/ShopContext";
@@ -84,7 +85,10 @@ const Contact = () => {
             Contact us
           </h1>
           <p className="text-stone-600 max-w-2xl mx-auto">
-            Have a question, custom request, or feedback? We’d love to hear from you. Drop a message and we’ll reply within 24–48 hours.
+            Have a question, custom tapestry request, or feedback? At JSK Handloom, we’d love to hear from you. For custom designs or bulk orders, mention your requirement in the message. We’ll reply within 24–48 hours.
+          </p>
+          <p className="text-stone-500 text-sm mt-2">
+            <Link to="/faq" className="text-amber-600 hover:text-amber-700 font-medium">See our FAQ</Link> for quick answers on sizes, shipping, and price requests.
           </p>
         </header>
 
@@ -106,28 +110,28 @@ const Contact = () => {
                 <li>
                   <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Email</p>
                   <a
-                    href="mailto:hello@tapestry.in"
+                    href="mailto:swapnilmauryavidhay@gmail.com"
                     className="text-stone-800 hover:text-amber-600 transition-colors"
                   >
-                    hello@tapestry.in
+                    swapnilmauryavidhay@gmail.com
                   </a>
                 </li>
                 <li>
                   <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Phone</p>
                   <a
-                    href="tel:+919876543210"
+                    href="tel:+919305058581"
                     className="text-stone-800 hover:text-amber-600 transition-colors"
                   >
-                    +91 XXXXX XXXXX
+                    +91 9305058581
                   </a>
                 </li>
                 <li>
                   <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Address</p>
-                  <p className="text-stone-700">India</p>
+                  <p className="text-stone-700">Bhawanipur Shivpur, Varanasi, Uttar Pradesh, India – 221003</p>
                 </li>
               </ul>
               <p className="mt-6 text-sm text-stone-500 border-t border-stone-100 pt-6">
-                We typically reply within 24–48 hours on business days.
+                We ship all over India. Approximate delivery: 7 days. We typically reply within 24–48 hours on business days.
               </p>
             </div>
           </div>

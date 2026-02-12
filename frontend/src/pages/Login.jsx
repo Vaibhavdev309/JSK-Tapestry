@@ -10,9 +10,13 @@ const Login = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPhoneOtpStep, setShowPhoneOtpStep] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -45,7 +49,7 @@ const Login = () => {
       const payload =
         currentState === "Login"
           ? { email, password }
-          : { name, email, password };
+          : { name, email, password, phone: phone.trim() };
 
       const response = await axios.post(
         `${backendUrl}/api/user/${endpoint}`,
@@ -54,27 +58,27 @@ const Login = () => {
 
       if (response.data.success) {
         if (currentState === "Sign Up") {
-          // Registration - check if verification is required
-          if (response.data.requiresVerification) {
+          if (response.data.requiresPhoneVerification && response.data.token) {
+            setToken(response.data.token);
+            localStorage.setItem("token", response.data.token);
+            setShowPhoneOtpStep(true);
+            toast.success(response.data.message || "Verify your mobile with the OTP sent.");
+            return;
+          }
+          if (response.data.requiresVerification && !response.data.token) {
             toast.success(response.data.message || "Account created! Please check your email to verify your account.");
-            // Don't set token, user needs to verify email first
             setEmail("");
             setPassword("");
             setName("");
-            // Show message about checking email
+            setPhone("");
             return;
-          } else {
-            // If somehow registration doesn't require verification, set token
-            setToken(response.data.token);
-            localStorage.setItem("token", response.data.token);
-            toast.success("Account created successfully!");
           }
-        } else {
-          // Login
           setToken(response.data.token);
           localStorage.setItem("token", response.data.token);
-          
-          // Check email verification status
+          toast.success("Account created successfully!");
+        } else {
+          setToken(response.data.token);
+          localStorage.setItem("token", response.data.token);
           if (response.data.emailVerified === false) {
             toast.warning(
               response.data.message || "Please verify your email address to access all features.",
@@ -94,14 +98,76 @@ const Login = () => {
     }
   };
 
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) {
+      toast.error("Enter the 6-digit OTP");
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      const tokenStored = localStorage.getItem("token");
+      const response = await axios.post(
+        `${backendUrl}/api/user/verify-phone-otp`,
+        { otp: otp.trim() },
+        { headers: { token: tokenStored } }
+      );
+      if (response.data.success) {
+        toast.success("Mobile number verified!");
+        setShowPhoneOtpStep(false);
+        setOtp("");
+        navigate("/");
+      } else {
+        toast.error(response.data.message || "Invalid OTP");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Verification failed");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (token) {
+    if (token && !showPhoneOtpStep) {
       navigate("/");
     }
-  }, [token, navigate]);
+  }, [token, showPhoneOtpStep, navigate]);
 
   const inputClass =
     "input-tapestry";
+
+  if (showPhoneOtpStep) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="card-tapestry w-full max-w-md p-6 sm:p-8 md:p-10">
+          <div className="text-center mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 prata-regular">Verify mobile number</h2>
+            <p className="mt-2 text-sm text-stone-600">Enter the 6-digit OTP sent to your mobile</p>
+          </div>
+          <form onSubmit={handleVerifyOtp} className="space-y-5">
+            <div>
+              <label htmlFor="otp" className="sr-only">OTP</label>
+              <input
+                id="otp"
+                name="otp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                className={inputClass}
+                placeholder="Enter 6-digit OTP"
+                maxLength={6}
+              />
+            </div>
+            <button type="submit" disabled={otpLoading} className="btn-primary w-full py-3.5">
+              {otpLoading ? <span className="inline-block w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : "Verify"}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-stone-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
@@ -144,21 +210,35 @@ const Login = () => {
           )}
 
           {currentState === "Sign Up" && (
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-                placeholder="Full name"
-              />
-            </div>
+            <>
+              <div>
+                <label htmlFor="name" className="sr-only">Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Full name"
+                />
+              </div>
+              <div>
+                <label htmlFor="phone" className="sr-only">Mobile number</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  className={inputClass}
+                  placeholder="10-digit mobile number"
+                  maxLength={10}
+                />
+              </div>
+            </>
           )}
 
           <div>

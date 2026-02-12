@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/emailService.js";
+import { sendOtpSms } from "../utils/smsService.js";
 
 const loginUser = async (req, res) => {
   try {
@@ -76,10 +77,15 @@ const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
+const validatePhone = (phone) => {
+  const digits = (phone || "").replace(/\D/g, "");
+  return digits.length === 10 && /^[6-9]/.test(digits);
+};
+
 const registerUser = async (req, res) => {
   try {
     console.log("🔵 [REGISTER] User registration request received");
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
 
     // Validate input
     if (!name || !email || !password) {
@@ -87,6 +93,20 @@ const registerUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Name, email, and password are required",
+      });
+    }
+
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number is required",
+      });
+    }
+
+    if (!validatePhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid 10-digit mobile number",
       });
     }
 
@@ -125,11 +145,19 @@ const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const phoneTrimmed = phone.trim().replace(/\D/g, "").slice(-10);
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const phoneOtpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+
     // Create user
     const newUser = new userModel({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashedPassword,
+      phone: phoneTrimmed,
+      phoneVerified: false,
+      phoneOtp: otp,
+      phoneOtpExpires,
       isEmailVerified: false,
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
@@ -144,14 +172,24 @@ const registerUser = async (req, res) => {
       console.log("✅ Verification email sent");
     } else {
       console.error("❌ Error sending verification email:", emailResult.error);
-      // Don't fail registration if email fails, but log it
-      // User can request resend later
     }
 
-    // Don't send token immediately - user needs to verify email first
+    // Send OTP to mobile
+    const smsResult = await sendOtpSms(phoneTrimmed, otp);
+    if (!smsResult.success) {
+      console.error("❌ Error sending OTP:", smsResult.error);
+      return res.status(500).json({
+        success: false,
+        message: "Could not send OTP to your mobile. Please check the number and try again.",
+      });
+    }
+
+    const token = createToken(user._id);
     res.status(201).json({
       success: true,
-      message: "Account created successfully! Please check your email to verify your account.",
+      message: "Account created. Verify your mobile with the OTP sent.",
+      token,
+      requiresPhoneVerification: true,
       requiresVerification: true,
     });
   } catch (error) {
@@ -309,7 +347,13 @@ const updateUserProfile = async (req, res) => {
 
     if (name) user.name = name.trim();
     if (email) user.email = email.trim();
-    if (phone !== undefined) user.phone = phone?.trim() || "";
+    if (phone !== undefined) {
+      const trimmed = phone?.trim() || "";
+      user.phone = trimmed.replace(/\D/g, "").slice(-10) || "";
+      user.phoneVerified = false;
+      user.phoneOtp = undefined;
+      user.phoneOtpExpires = undefined;
+    }
 
     await user.save();
     console.log("✅ Profile updated successfully");
@@ -833,4 +877,92 @@ const resetPassword = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, googleAuth, adminLogin, getUserProfile, updateUserProfile, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress, verifyEmail, resendVerificationEmail, forgotPassword, resetPassword };
+// Send OTP to user's mobile (for verification or re-send)
+const sendPhoneOtp = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const { phone } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Not authorized" });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const mobile = (phone !== undefined ? phone : user.phone)?.toString().trim().replace(/\D/g, "").slice(-10);
+    if (!mobile || mobile.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid 10-digit mobile number",
+      });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    user.phone = mobile;
+    user.phoneVerified = false;
+    user.phoneOtp = otp;
+    user.phoneOtpExpires = new Date(Date.now() + 5 * 60 * 1000);
+    await user.save();
+
+    const smsResult = await sendOtpSms(mobile, otp);
+    if (!smsResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: "Could not send OTP. Please check the number and try again.",
+      });
+    }
+
+    res.json({ success: true, message: "OTP sent to your mobile" });
+  } catch (error) {
+    console.error("❌ [SEND PHONE OTP] Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to send OTP" });
+  }
+};
+
+// Verify OTP and mark phone as verified
+const verifyPhoneOtp = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const { otp } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Not authorized" });
+    }
+    if (!otp || String(otp).replace(/\D/g, "").length !== 6) {
+      return res.status(400).json({ success: false, message: "Please enter the 6-digit OTP" });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (!user.phoneOtp || !user.phoneOtpExpires) {
+      return res.status(400).json({ success: false, message: "Please request a new OTP first" });
+    }
+    if (new Date() > user.phoneOtpExpires) {
+      user.phoneOtp = undefined;
+      user.phoneOtpExpires = undefined;
+      await user.save();
+      return res.status(400).json({ success: false, message: "OTP expired. Please request a new one." });
+    }
+    if (user.phoneOtp !== String(otp).trim()) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    user.phoneVerified = true;
+    user.phoneOtp = undefined;
+    user.phoneOtpExpires = undefined;
+    await user.save();
+
+    res.json({ success: true, message: "Mobile number verified successfully" });
+  } catch (error) {
+    console.error("❌ [VERIFY PHONE OTP] Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Verification failed" });
+  }
+};
+
+export { loginUser, registerUser, googleAuth, adminLogin, getUserProfile, updateUserProfile, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress, verifyEmail, resendVerificationEmail, forgotPassword, resetPassword, sendPhoneOtp, verifyPhoneOtp };

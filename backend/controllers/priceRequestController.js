@@ -1,9 +1,21 @@
 import PriceRequest from "../models/PriceRequest.js";
+import userModel from "../models/userModel.js";
+import { sendPriceRequestNotificationEmail } from "../utils/emailService.js";
 
 // Create new price request
 export const createPriceRequest = async (req, res) => {
   console.log("i am in createPriceRequest");
   try {
+    const userId = req.body.userId;
+    const user = await userModel.findById(userId).select("phone phoneVerified");
+    if (!user?.phone || !user.phoneVerified) {
+      return res.status(400).json({
+        success: false,
+        requiresMobile: true,
+        message: "Please add and verify your mobile number to request price approval.",
+      });
+    }
+
     const { items } = req.body;
 
     const priceRequest = new PriceRequest({
@@ -20,6 +32,10 @@ export const createPriceRequest = async (req, res) => {
     const populatedRequest = await PriceRequest.findById(priceRequest._id)
       .populate("items.productId")
       .populate("userId", "name email");
+
+    sendPriceRequestNotificationEmail(populatedRequest).catch((err) =>
+      console.error("Price request notification email error:", err?.message)
+    );
 
     res.status(201).json({
       success: true,

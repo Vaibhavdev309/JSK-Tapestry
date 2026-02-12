@@ -127,9 +127,9 @@ const Product = () => {
 
           <hr className="mt-8 border-stone-200" />
           <ul className="mt-5 text-sm text-stone-600 space-y-2">
-            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> 100% pure silk, handpicked for quality</li>
+            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> Handpicked for quality</li>
             <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> Cash on delivery available</li>
-            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> Easy return and exchange within 7 days</li>
+            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> We ship all over India · approx. 7 days</li>
           </ul>
         </div>
       </div>
@@ -140,7 +140,12 @@ const Product = () => {
         <p className="text-sm text-stone-600 leading-relaxed">{productData.description || "Handcrafted Indian handloom tapestry. Each piece is chosen for quality and craftsmanship."}</p>
       </div>
 
-      <RelatedProduct category={productData.category} subCategory={productData.subCategory} />
+      <RelatedProduct
+        category={productData.category}
+        subCategory={productData.subCategory}
+        productId={productData._id}
+        sizes={productData.sizes}
+      />
     </main>
   );
 };

@@ -8,29 +8,34 @@ const Star = () => (
 
 const testimonials = [
   {
-    name: "Priya M.",
+    name: "Priya",
+    location: "Varanasi",
     initial: "P",
-    text: "The Radha Krishna tapestry I ordered is even more beautiful in person. The weave is smooth and the colours are rich. It’s now the focal point of our living room. Highly recommend Tapestry.",
+    text: "Radha Krishna piece is even better in person—smooth weave, rich colours. Now the centre of our living room. Would recommend.",
   },
   {
-    name: "Raj K.",
+    name: "Raj",
+    location: "Lucknow",
     initial: "R",
-    text: "I was looking for something meaningful for my parents’ anniversary. The Goddess Lakshmi piece was perfect—authentic feel and excellent packaging. Delivery was quick too.",
+    text: "Got the Lakshmi ji one for my parents’ anniversary. They loved it. Packing was good, delivery was on time.",
   },
   {
-    name: "Anjali S.",
+    name: "Anjali",
+    location: "Delhi",
     initial: "A",
-    text: "Love the variety! From spiritual art to festive and nature themes, there’s something for every room. Quality is consistent and the exchange process was hassle-free when I needed a different size.",
+    text: "Good variety—spiritual, festive, nature. I picked two for different rooms. Quality is consistent.",
   },
   {
-    name: "Kavita R.",
+    name: "Kavita",
+    location: "Patna",
     initial: "K",
-    text: "These tapestries bring such a warm, traditional touch to our home. The handloom texture is noticeable and adds character. Will definitely order again.",
+    text: "Adds a warm, traditional feel to the home. You can tell it’s handloom. Planning to order one more.",
   },
   {
-    name: "Arun P.",
+    name: "Arun",
+    location: "Mumbai",
     initial: "A",
-    text: "Great customer support and a thoughtfully curated collection. The Lord Ganesha wall hanging I bought looks stunning. Worth every rupee.",
+    text: "Ganesh ji wall hanging looks great. Customer support was helpful when I had a query. Worth it.",
   },
 ];
 
@@ -42,7 +47,7 @@ const Testimonials = () => {
           What Our Customers Say
         </h2>
         <p className="text-center text-stone-500 mt-2 max-w-xl mx-auto">
-          Real reviews from people who’ve brought a piece of Tapestry into their homes.
+          Real reviews from people who’ve brought a piece of JSK Handloom into their homes.
         </p>
 
         <div className="mt-8 sm:mt-10 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -61,7 +66,7 @@ const Testimonials = () => {
                       <Star key={n} />
                     ))}
                   </div>
-                  <p className="mt-1 font-medium text-stone-900">{t.name}</p>
+                  <p className="mt-1 font-medium text-stone-900">{t.name}{t.location ? `, ${t.location}` : ""}</p>
                 </div>
               </div>
               <p className="mt-4 text-stone-600 text-sm leading-relaxed">

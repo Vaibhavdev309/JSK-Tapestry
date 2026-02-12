@@ -165,19 +165,22 @@ const UserChat = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !chatId) return;
+  const sendMessage = async (optionalContent) => {
+    const text = (optionalContent ?? newMessage).trim();
+    if (!text || !chatId) return;
     try {
       const response = await axios.post(
         `${backendUrl}/api/message/send`,
-        { chatId, content: newMessage, isAdmin: false },
+        { chatId, content: text, isAdmin: false },
         { headers: { token } }
       );
       if (response.data.success) {
-        setMessages((prev) => [...prev, response.data.message]);
+        const next = [response.data.message];
+        if (response.data.botReply) next.push(response.data.botReply);
+        setMessages((prev) => [...prev, ...next]);
         setNewMessage("");
         if (socketRef.current) {
-          socketRef.current.emit("new Message", response.data);
+          socketRef.current.emit("new Message", { message: response.data.message });
           socketRef.current.emit("stop typing", String(chatId));
         }
       }
@@ -185,6 +188,14 @@ const UserChat = () => {
       console.error("Message send error:", error.message);
     }
   };
+
+  const quickReplies = [
+    "Hi, I need help",
+    "Shipping & delivery?",
+    "What sizes do you offer?",
+    "How does price approval work?",
+    "Contact / WhatsApp",
+  ];
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -276,23 +287,49 @@ const UserChat = () => {
               </div>
             ) : (
             <div className="space-y-3">
+              {messages.length === 0 && (
+                <div className="text-center space-y-3">
+                  <p className="text-stone-600 text-sm">
+                    Hi! 👋 Ask me about shipping, sizes, price requests, or tap a quick reply below. Our team will also reply when they’re online.
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {quickReplies.map((label) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => sendMessage(label)}
+                        className="px-3 py-2 text-xs font-medium rounded-xl bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200 transition-colors"
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {messages.map((msg) => (
                 <div
                   key={msg._id || msg.createdAt}
                   className={`flex ${
-                    msg.sender === "admin" ? "justify-start" : "justify-end"
+                    msg.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div
-                    className={`max-w-[70%] rounded-2xl p-3 ${
-                      msg.sender === "admin"
-                        ? "bg-white text-stone-800 shadow-md border border-stone-100"
-                        : "bg-amber-600 text-white"
+                    className={`max-w-[85%] rounded-2xl p-3 ${
+                      msg.sender === "user"
+                        ? "bg-amber-600 text-white"
+                        : msg.sender === "bot"
+                          ? "bg-emerald-50 text-stone-800 shadow-md border border-emerald-100"
+                          : "bg-white text-stone-800 shadow-md border border-stone-100"
                     }`}
                   >
-                    <p className="text-sm break-words">{msg.content}</p>
+                    {(msg.sender === "admin" || msg.sender === "bot") && (
+                      <p className="text-xs font-semibold text-stone-500 mb-0.5">
+                        {msg.sender === "bot" ? "Support Bot" : "Support"}
+                      </p>
+                    )}
+                    <p className="text-sm break-words whitespace-pre-line">{msg.content}</p>
                     <p className={`text-xs mt-1 ${
-                      msg.sender === "admin" ? "text-stone-500" : "opacity-80"
+                      msg.sender === "user" ? "opacity-80" : "text-stone-500"
                     }`}>
                       {new Date(msg.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -302,11 +339,18 @@ const UserChat = () => {
                   </div>
                 </div>
               ))}
-              {messages.length === 0 && (
-                <div className="h-full flex items-center justify-center">
-                  <p className="text-stone-500 text-sm text-center">
-                    Start a conversation with our support team
-                  </p>
+              {messages.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center pt-1">
+                  {quickReplies.map((label) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => sendMessage(label)}
+                      className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors"
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               )}
               <div ref={messagesEndRef} />

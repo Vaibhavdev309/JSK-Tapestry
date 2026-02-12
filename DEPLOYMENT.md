@@ -58,7 +58,11 @@ This guide will help you deploy the Tapestry e-commerce project:
    EMAIL_USER=your_email@gmail.com
    EMAIL_PASSWORD=your_app_password
    FRONTEND_URL=https://your-vercel-app.vercel.app
+   TWILIO_ACCOUNT_SID=your_twilio_sid
+   TWILIO_AUTH_TOKEN=your_twilio_token
+   TWILIO_PHONE_NUMBER=+91XXXXXXXXXX
    ```
+   **SMS OTP (optional):** If you set `TWILIO_*`, users get OTP via SMS for mobile verification. If not set, OTP is logged in server console (fine for testing).
 
    **Important Notes:**
    - Use MongoDB Atlas connection string (not localhost)
@@ -268,6 +272,9 @@ Socket.IO is configured to work with your frontend URL. Make sure:
 - `EMAIL_USER`
 - `EMAIL_PASSWORD`
 - `FRONTEND_URL`
+- `TWILIO_ACCOUNT_SID` (optional, for SMS OTP)
+- `TWILIO_AUTH_TOKEN` (optional)
+- `TWILIO_PHONE_NUMBER` (optional, E.164 e.g. +91XXXXXXXXXX)
 
 ### Frontend (Vercel)
 - `VITE_BACKEND_URL`
@@ -287,6 +294,15 @@ Socket.IO is configured to work with your frontend URL. Make sure:
 - [ ] CORS configured correctly
 - [ ] Socket.IO working
 - [ ] All features tested
+
+---
+
+## Before you go live
+
+- **Business contact** is set in the repo: phone, email, and Instagram (Footer + Contact page). Update `frontend/src/components/Footer.jsx` and `frontend/src/pages/Contact.jsx` if you change them.
+- **Admin login:** Use the same `ADMIN_EMAIL` and `ADMIN_PASSWORD` you set in Render to log in at `https://your-frontend.vercel.app` (admin route if you have one) or your admin panel URL.
+- **Razorpay:** Use Live keys and complete KYC so real payments work.
+- **SMS OTP:** For production mobile verification, add Twilio env vars and run `npm install twilio` in the backend (or add `twilio` to `backend/package.json`).
 
 ---
 

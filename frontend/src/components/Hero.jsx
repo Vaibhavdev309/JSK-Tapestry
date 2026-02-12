@@ -10,17 +10,17 @@ const Hero = () => {
           <div className="mb-12 lg:my-16 lg:max-w-xl lg:pr-6">
             <div className="max-w-xl mb-6">
               <span className="inline-block px-3 py-1.5 mb-4 text-xs font-semibold tracking-wider text-amber-800 uppercase rounded-full bg-amber-200/80">
-                Handcrafted in India
+                JSK Handloom · Handcrafted in India
               </span>
               <h1 className="prata-regular max-w-lg mb-6 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl sm:leading-tight md:text-4xl lg:text-5xl">
-                Authentic Indian Handloom Tapestries
+                Handloom Tapestries &amp; Wall Hangings
                 <br className="hidden sm:block" />
                 <span className="text-amber-700">Woven with tradition,</span>
                 <br className="hidden sm:block" />
                 delivered with care.
               </h1>
               <p className="text-base text-stone-600 md:text-lg leading-relaxed">
-                Explore wall hangings and tapestries inspired by Indian heritage—from divine artistry and festive motifs to nature and folklore. Each piece is handpicked for quality and craftsmanship.
+                Decorate your home with authentic handloom tapestries—divine, festive, and nature-inspired designs. Each piece is handpicked for quality and craftsmanship, perfect for walls and living spaces.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
@@ -43,7 +43,7 @@ const Hero = () => {
           <img
             className="object-contain w-full h-auto max-h-[40rem] lg:max-h-[45rem] rounded-tl-2xl sm:rounded-tl-3xl rounded-br-2xl sm:rounded-br-3xl shadow-xl"
             src={HERO_IMAGE}
-            alt="Indian handloom tapestries and wall art"
+            alt="JSK Handloom handloom tapestries and wall hangings"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = HERO_PLACEHOLDER;
