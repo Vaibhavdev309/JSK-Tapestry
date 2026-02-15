@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cron from "node-cron";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import { Server } from "socket.io";
@@ -103,10 +104,26 @@ app.get("/", (req, res) => {
   res.send("API working");
 });
 
+// Lightweight endpoint for cron/uptime ping – backend active rakhne ke liye (Render free tier sleep nahi karega)
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ ok: true, ts: Date.now() });
+});
+
 const server = app.listen(port, "0.0.0.0", () => {
   console.log("🚀 Server started on port : " + port);
   console.log("📡 Server accessible at: http://localhost:" + port);
   console.log("🌐 API endpoint: http://localhost:" + port + "/api");
+
+  // node-cron: jab server chal raha ho tab har 14 min apne aap /api/health hit karo (Render free tier sleep delay)
+  // Note: Jab server bilkul so jaaye (cold) tab ye nahi chalega; us case me bahar se ek ping (cron-job.org etc.) chahiye
+  const backendUrl = process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_PUBLIC_URL;
+  if (backendUrl && process.env.NODE_ENV === "production") {
+    const healthUrl = `${backendUrl.replace(/\/$/, "")}/api/health`;
+    cron.schedule("*/14 * * * *", () => {
+      fetch(healthUrl).catch((err) => console.log("⏰ [cron] self-ping skip:", err?.message || err));
+    });
+    console.log("⏰ [cron] Self-ping every 14 min to", healthUrl);
+  }
 });
 
 // Socket.IO CORS configuration

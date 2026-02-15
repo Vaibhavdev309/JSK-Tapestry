@@ -1,0 +1,25 @@
+# Backend ko active rakhne ke liye har 14 minute par /api/health ping karta hai.
+# GitHub repo → Settings → Secrets and variables → Actions me BACKEND_URL secret add karo
+# (e.g. https://your-backend.onrender.com)
+
+name: Keep backend awake
+
+on:
+  schedule:
+    # Har 14 minute par (Render free tier ~15 min par sota hai)
+    - cron: "*/14 * * * *"
+  workflow_dispatch: # Manual run bhi kar sakte ho
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health
+        run: |
+          url="${{ secrets.BACKEND_URL }}/api/health"
+          if [ -z "${{ secrets.BACKEND_URL }}" ]; then
+            echo "BACKEND_URL secret not set. Skip."
+            exit 0
+          fi
+          echo "Pinging $url"
+          curl -sf --max-time 30 "$url" || true
