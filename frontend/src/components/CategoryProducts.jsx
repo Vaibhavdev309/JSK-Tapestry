@@ -12,7 +12,6 @@ const CategoryProducts = () => {
   const navigate = useNavigate();
   const { products, addToCart } = useContext(ShopContext);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedSize, setSelectedSize] = useState("");
   const [mainImage, setMainImage] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [showMagnifier, setShowMagnifier] = useState(false);
@@ -111,7 +110,6 @@ const CategoryProducts = () => {
 
   const handleVariantSelect = (id) => {
     navigate(`/collection/${category}/${subCategory}/${id}`);
-    setSelectedSize("");
   };
 
   const handleMouseMove = (e) => {
@@ -436,41 +434,20 @@ const CategoryProducts = () => {
                     {selectedProduct.description}
                   </p>
 
-                  {/* Size Selection */}
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-stone-800 mb-3 uppercase tracking-wide">
-                      Select Size
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProduct.sizes?.map((size) => (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() => setSelectedSize(size)}
-                          className={`min-w-[4rem] px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 ${
-                            selectedSize === size
-                              ? "border-amber-500 bg-amber-50 text-amber-800 shadow-sm"
-                              : "border-stone-200 text-stone-700 hover:border-amber-300 hover:bg-amber-50/50"
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
 
                 {/* Add to Cart & policies */}
                 <div className="space-y-5 pt-5 sm:pt-6 border-t border-stone-200">
                   <button
                     type="button"
-                    onClick={() => selectedSize && addToCart(selectedProduct._id, selectedSize)}
-                    disabled={!selectedSize}
-                    className={`w-full py-3.5 rounded-xl text-[15px] font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
-                      selectedSize ? "btn-primary" : "bg-stone-100 text-stone-400 cursor-not-allowed border border-stone-200"
-                    }`}
+                    onClick={() => {
+                      const defaultSize = selectedProduct.sizes?.[0];
+                      if (defaultSize) addToCart(selectedProduct._id, defaultSize);
+                    }}
+                    disabled={!selectedProduct.sizes?.length}
+                    className="w-full py-3.5 rounded-xl text-[15px] font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 btn-primary"
                   >
-                    {selectedSize ? "Add to cart" : "Select a size first"}
+                    Add to cart
                   </button>
                   <ul className="space-y-2.5 text-sm text-stone-600">
                     <li className="flex items-center gap-2.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> 100% pure silk, handpicked for quality</li>

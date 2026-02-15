@@ -536,7 +536,7 @@ const Edit = ({ token }) => {
                 Price <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">₹</span>
                 <input
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}

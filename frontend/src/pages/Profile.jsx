@@ -539,69 +539,6 @@ const Profile = () => {
         <div className="card-tapestry p-6">
           <h2 className="text-xl font-semibold text-stone-800 mb-6">Personal Information</h2>
           
-          {/* Email Verification Status */}
-          {user && (
-            <div className={`mb-6 p-4 rounded-lg border-2 ${
-              user.isEmailVerified
-                ? "bg-green-50 border-green-200"
-                : "bg-amber-50 border-amber-200"
-            }`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3">
-                  {user.isEmailVerified ? (
-                    <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  )}
-                  <div>
-                    <p className={`font-medium ${
-                      user.isEmailVerified ? "text-green-800" : "text-amber-800"
-                    }`}>
-                      {user.isEmailVerified
-                        ? "Email Verified"
-                        : "Email Not Verified"}
-                    </p>
-                    <p className={`text-sm mt-1 ${
-                      user.isEmailVerified ? "text-green-700" : "text-amber-700"
-                    }`}>
-                      {user.isEmailVerified
-                        ? "Your email address has been verified."
-                        : "Please verify your email address to access all features."}
-                    </p>
-                  </div>
-                </div>
-                {!user.isEmailVerified && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const response = await axios.post(
-                          `${backendUrl}/api/user/resend-verification`,
-                          {},
-                          { headers: { token } }
-                        );
-                        if (response.data.success) {
-                          toast.success(response.data.message || "Verification email sent!");
-                        } else {
-                          toast.error(response.data.message || "Failed to resend verification email");
-                        }
-                      } catch (error) {
-                        toast.error(error.response?.data?.message || "Failed to resend verification email");
-                      }
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
-                  >
-                    Resend Email
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
           <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-2xl">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1.5">
@@ -618,9 +555,6 @@ const Profile = () => {
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1.5">
                 Email <span className="text-red-500">*</span>
-                {user && !user.isEmailVerified && (
-                  <span className="ml-2 text-xs text-amber-600">(Not verified)</span>
-                )}
               </label>
               <input
                 type="email"

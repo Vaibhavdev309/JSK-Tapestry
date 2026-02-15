@@ -10,7 +10,6 @@ const Product = () => {
   const [productData, setProductData] = useState(null);
   const { products, addToCart } = useContext(ShopContext);
   const [image, setImage] = useState("");
-  const [size, setSize] = useState("");
 
   useEffect(() => {
     const product = products.find((item) => item._id === productId);
@@ -98,31 +97,16 @@ const Product = () => {
           <p className="text-sm text-stone-500 mt-1">Handcrafted · {productData.category || "Tapestry"}{productData.subCategory ? ` · ${productData.subCategory}` : ""}</p>
           <p className="mt-4 text-stone-600 leading-relaxed">{productData.description}</p>
 
-          <div className="mt-6 sm:mt-8">
-            <p className="text-sm font-semibold text-stone-800 mb-3">Select size</p>
-            <div className="flex flex-wrap gap-2">
-              {productData.sizes?.map((s, i) => (
-                <button
-                  type="button"
-                  key={i}
-                  onClick={() => setSize(s)}
-                  className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-colors ${
-                    size === s ? "border-amber-500 bg-amber-50 text-amber-800" : "border-stone-200 hover:border-amber-300 text-stone-700"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <button
             type="button"
-            onClick={() => size && addToCart(productData._id, size)}
-            disabled={!size}
+            onClick={() => {
+              const defaultSize = productData.sizes?.[0];
+              if (defaultSize) addToCart(productData._id, defaultSize);
+            }}
+            disabled={!productData.sizes?.length}
             className="btn-primary mt-6 w-full sm:w-auto px-8 py-3"
           >
-            {size ? "Add to cart" : "Select a size"}
+            Add to cart
           </button>
 
           <hr className="mt-8 border-stone-200" />

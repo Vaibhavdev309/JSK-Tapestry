@@ -14,7 +14,7 @@ const getBackendUrl = () => {
 };
 
 const ShopContextProvider = (props) => {
-  const currency = "$";
+  const currency = "₹";
   const delievery_fee = 10;
   const backendUrl = getBackendUrl();
   const [search, setSearch] = useState("");

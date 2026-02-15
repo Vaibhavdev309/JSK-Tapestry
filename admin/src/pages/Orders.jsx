@@ -104,8 +104,7 @@ const Orders = ({ token }) => {
                   <div className="space-y-1">
                     {order.items.map((item, idx) => (
                       <p key={idx} className="text-xs sm:text-sm text-gray-600 break-words">
-                        {item.name} × {item.quantity}{" "}
-                        {item.size && `(${item.size})`}
+                        {item.name} × {item.quantity}
                       </p>
                     ))}
                   </div>

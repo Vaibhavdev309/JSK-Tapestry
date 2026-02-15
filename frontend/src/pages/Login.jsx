@@ -54,30 +54,9 @@ const Login = () => {
       );
 
       if (response.data.success) {
-        if (currentState === "Sign Up") {
-          if (response.data.requiresVerification && !response.data.token) {
-            toast.success(response.data.message || "Account created! Please check your email to verify your account.");
-            setEmail("");
-            setPassword("");
-            setName("");
-            setPhone("");
-            return;
-          }
-          setToken(response.data.token);
-          localStorage.setItem("token", response.data.token);
-          toast.success(response.data.message || "Account created successfully!");
-        } else {
-          setToken(response.data.token);
-          localStorage.setItem("token", response.data.token);
-          if (response.data.emailVerified === false) {
-            toast.warning(
-              response.data.message || "Please verify your email address to access all features.",
-              { autoClose: 5000 }
-            );
-          } else {
-            toast.success("Welcome back!");
-          }
-        }
+        setToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
+        toast.success(currentState === "Sign Up" ? (response.data.message || "Account created successfully!") : "Welcome back!");
       } else {
         toast.error(response.data.message);
       }

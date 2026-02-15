@@ -295,7 +295,7 @@ const Cart = () => {
                           >
                             <div className="min-w-0">
                               <p className="font-medium text-stone-800 truncate">{item.productId?.name || "Product"}</p>
-                              <p className="text-stone-500">Size {item.size} · Qty {item.quantity}</p>
+                              <p className="text-stone-500">Qty {item.quantity}</p>
                             </div>
                             <div className="text-right flex-shrink-0">
                               {request.status === "approved" ? (
@@ -376,7 +376,6 @@ const Cart = () => {
                           {name}
                         </Link>
                         <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="px-2.5 py-1 bg-stone-100 text-stone-600 rounded-lg text-xs font-medium">Size {item.size}</span>
                           <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium">Price on request</span>
                         </div>
                         {productData?.material && (

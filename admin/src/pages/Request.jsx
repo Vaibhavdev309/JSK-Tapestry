@@ -154,7 +154,7 @@ const Request = ({ token }) => {
                         </p>
                         {product?.price != null && product?.price !== "" && (
                           <p className="text-xs text-gray-400 mt-1">
-                            Current: ${product.price}
+                            Current: ₹{product.price}
                           </p>
                         )}
                       </div>

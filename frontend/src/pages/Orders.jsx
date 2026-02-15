@@ -114,7 +114,6 @@ const Orders = () => {
                         {item.productId?.name || "Product"}
                       </h3>
                       <div className="text-sm text-stone-600 mt-1">
-                        <p>Size: {item.size}</p>
                         <p>Quantity: {item.quantity}</p>
                         <p>
                           Price: {currency}

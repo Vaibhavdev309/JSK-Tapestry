@@ -44,25 +44,11 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Check email verification status
-    if (!user.isEmailVerified) {
-      console.log("⚠️ User email not verified:", user._id);
-      // Allow login but inform user about verification
-      const token = createToken(user._id);
-      return res.json({
-        success: true,
-        token,
-        emailVerified: false,
-        message: "Please verify your email address to access all features.",
-      });
-    }
-
     console.log("✅ User logged in successfully:", user._id);
     const token = createToken(user._id);
     res.json({
       success: true,
       token,
-      emailVerified: true,
     });
   } catch (error) {
     console.error("❌ [LOGIN] Error:", error);
@@ -136,46 +122,30 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Generate email verification token
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    const verificationExpires = new Date();
-    verificationExpires.setHours(verificationExpires.getHours() + 24); // 24 hours expiry
-
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const phoneTrimmed = phone.trim().replace(/\D/g, "").slice(-10);
 
-    // Create user (mobile taken as-is, no OTP verification for now)
+    // Create user (email verification skipped for now – baad me add kar sakte ho)
     const newUser = new userModel({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashedPassword,
       phone: phoneTrimmed,
       phoneVerified: true,
-      isEmailVerified: false,
-      emailVerificationToken: verificationToken,
-      emailVerificationExpires: verificationExpires,
+      isEmailVerified: true,
     });
 
     const user = await newUser.save();
     console.log("✅ User created:", user._id);
-
-    // Send verification email
-    const emailResult = await sendVerificationEmail(user.email, user.name, verificationToken);
-    if (emailResult.success) {
-      console.log("✅ Verification email sent");
-    } else {
-      console.error("❌ Error sending verification email:", emailResult.error);
-    }
 
     const token = createToken(user._id);
     res.status(201).json({
       success: true,
       message: "Account created successfully.",
       token,
-      requiresVerification: true,
     });
   } catch (error) {
     console.error("❌ [REGISTER] Error:", error);
@@ -228,7 +198,7 @@ const googleAuth = async (req, res) => {
       const token = createToken(user._id);
       return res.json({ success: true, token });
     }
-    const newUser = new userModel({ name, email, googleId });
+    const newUser = new userModel({ name, email, googleId, isEmailVerified: true });
     await newUser.save();
     const token = createToken(newUser._id);
     res.json({ success: true, token });
