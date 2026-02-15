@@ -119,10 +119,21 @@ const server = app.listen(port, "0.0.0.0", () => {
   const backendUrl = process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_PUBLIC_URL;
   if (backendUrl && process.env.NODE_ENV === "production") {
     const healthUrl = `${backendUrl.replace(/\/$/, "")}/api/health`;
-    cron.schedule("*/14 * * * *", () => {
-      fetch(healthUrl).catch((err) => console.log("⏰ [cron] self-ping skip:", err?.message || err));
+    cron.schedule("*/14 * * * *", async () => {
+      const now = new Date().toISOString();
+      console.log("⏰ [node-cron] Running self-ping at", now);
+      try {
+        const res = await fetch(healthUrl);
+        if (res.ok) {
+          console.log("✅ [node-cron] Self-ping OK at", now, "| Backend active rakha gaya");
+        } else {
+          console.log("⚠️ [node-cron] Self-ping got status", res.status, "at", now);
+        }
+      } catch (err) {
+        console.log("❌ [node-cron] Self-ping fail at", now, "|", err?.message || err);
+      }
     });
-    console.log("⏰ [cron] Self-ping every 14 min to", healthUrl);
+    console.log("⏰ [node-cron] Setup done – har 14 min self-ping chalega →", healthUrl);
   }
 });
 
