@@ -31,8 +31,8 @@ const Footer = () => {
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-stone-400">Email:</span>
-              <a href="mailto:swapnilmauryavidhay@gmail.com" aria-label="Email" className="transition-colors text-amber-400 hover:text-amber-300">
-                swapnilmauryavidhay@gmail.com
+              <a href="mailto:jsk.handloom@gmail.com" aria-label="Email" className="transition-colors text-amber-400 hover:text-amber-300">
+                jsk.handloom@gmail.com
               </a>
             </div>
             <div className="flex flex-col gap-1">

@@ -340,7 +340,7 @@
 अगर आपको कोई समस्या आती है या कुछ समझ नहीं आता:
 
 1. **Developer से संपर्क करें**
-2. **Email**: vaibhav.dev.309@gmail.com
+2. **Email**: jsk.handloom@gmail.com
 3. **Issue describe करें**: 
    - क्या problem है?
    - कब से problem है?

@@ -221,8 +221,8 @@ export const sendContactNotificationEmail = async (contact) => {
 
 // Recipients for price-request and chat notifications (high interaction)
 const NOTIFICATION_EMAILS = [
+  "jsk.handloom@gmail.com",
   "vaibhav.dev.309@gmail.com",
-  "swapnilmauryavidhay@gmail.com",
 ];
 
 const createTransporterSafe = () => {

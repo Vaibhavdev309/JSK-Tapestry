@@ -110,10 +110,10 @@ const Contact = () => {
                 <li>
                   <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Email</p>
                   <a
-                    href="mailto:swapnilmauryavidhay@gmail.com"
+                    href="mailto:jsk.handloom@gmail.com"
                     className="text-stone-800 hover:text-amber-600 transition-colors"
                   >
-                    swapnilmauryavidhay@gmail.com
+                    jsk.handloom@gmail.com
                   </a>
                 </li>
                 <li>

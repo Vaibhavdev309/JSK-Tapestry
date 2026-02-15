@@ -22,7 +22,7 @@ const intents = [
   },
   {
     keywords: ["contact", "phone", "email", "call", "whatsapp", "number", "reach"],
-    reply: "You can reach us at:\n• Phone: +91 9305058581\n• Email: swapnilmauryavidhay@gmail.com\n• WhatsApp: same number. We typically reply within 24–48 hours.",
+    reply: "You can reach us at:\n• Phone: +91 9305058581\n• Email: jsk.handloom@gmail.com\n• WhatsApp: same number. We typically reply within 24–48 hours.",
   },
   {
     keywords: ["address", "location", "where", "varanasi"],

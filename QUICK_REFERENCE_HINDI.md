@@ -85,7 +85,7 @@
 
 ## 📞 सहायता
 
-**Developer Email**: vaibhav.dev.309@gmail.com
+**Contact Email**: jsk.handloom@gmail.com
 
 **समस्या होने पर**:
 1. Screenshot लें
