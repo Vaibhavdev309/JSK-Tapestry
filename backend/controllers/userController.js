@@ -146,18 +146,14 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const phoneTrimmed = phone.trim().replace(/\D/g, "").slice(-10);
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const phoneOtpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 min
 
-    // Create user
+    // Create user (mobile taken as-is, no OTP verification for now)
     const newUser = new userModel({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashedPassword,
       phone: phoneTrimmed,
-      phoneVerified: false,
-      phoneOtp: otp,
-      phoneOtpExpires,
+      phoneVerified: true,
       isEmailVerified: false,
       emailVerificationToken: verificationToken,
       emailVerificationExpires: verificationExpires,
@@ -174,22 +170,11 @@ const registerUser = async (req, res) => {
       console.error("❌ Error sending verification email:", emailResult.error);
     }
 
-    // Send OTP to mobile
-    const smsResult = await sendOtpSms(phoneTrimmed, otp);
-    if (!smsResult.success) {
-      console.error("❌ Error sending OTP:", smsResult.error);
-      return res.status(500).json({
-        success: false,
-        message: "Could not send OTP to your mobile. Please check the number and try again.",
-      });
-    }
-
     const token = createToken(user._id);
     res.status(201).json({
       success: true,
-      message: "Account created. Verify your mobile with the OTP sent.",
+      message: "Account created successfully.",
       token,
-      requiresPhoneVerification: true,
       requiresVerification: true,
     });
   } catch (error) {
@@ -350,7 +335,7 @@ const updateUserProfile = async (req, res) => {
     if (phone !== undefined) {
       const trimmed = phone?.trim() || "";
       user.phone = trimmed.replace(/\D/g, "").slice(-10) || "";
-      user.phoneVerified = false;
+      user.phoneVerified = true;
       user.phoneOtp = undefined;
       user.phoneOtpExpires = undefined;
     }

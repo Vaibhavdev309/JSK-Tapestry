@@ -7,12 +7,12 @@ export const createPriceRequest = async (req, res) => {
   console.log("i am in createPriceRequest");
   try {
     const userId = req.body.userId;
-    const user = await userModel.findById(userId).select("phone phoneVerified");
-    if (!user?.phone || !user.phoneVerified) {
+    const user = await userModel.findById(userId).select("phone");
+    if (!user?.phone) {
       return res.status(400).json({
         success: false,
         requiresMobile: true,
-        message: "Please add and verify your mobile number to request price approval.",
+        message: "Please add your mobile number to request price approval.",
       });
     }
 
