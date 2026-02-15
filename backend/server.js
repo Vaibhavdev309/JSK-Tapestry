@@ -48,10 +48,13 @@ const corsOptions = {
       "http://127.0.0.1:5175", // Admin panel (alternative)
     ].filter(Boolean); // Remove undefined values
     
-    // In production, also allow Vercel preview and production URLs
+    // In production, allow Vercel URLs and custom domain
     if (process.env.NODE_ENV === "production") {
-      // Allow any Vercel deployment
       if (origin.includes("vercel.app") || origin.includes("vercel.com")) {
+        return callback(null, true);
+      }
+      // Custom domain: krishnatapestry.com (with or without www)
+      if (origin.includes("krishnatapestry.com")) {
         return callback(null, true);
       }
     }
@@ -128,9 +131,12 @@ const socketCorsOptions = {
       "http://127.0.0.1:5175", // Admin panel (alternative)
     ].filter(Boolean);
     
-    // In production, allow Vercel deployments
+    // In production, allow Vercel and custom domain
     if (process.env.NODE_ENV === "production") {
       if (origin.includes("vercel.app") || origin.includes("vercel.com")) {
+        return callback(null, true);
+      }
+      if (origin.includes("krishnatapestry.com")) {
         return callback(null, true);
       }
     }
