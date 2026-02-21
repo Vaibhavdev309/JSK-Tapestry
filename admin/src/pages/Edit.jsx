@@ -5,6 +5,21 @@ import axios from "axios";
 import { backendUrl } from "../App";
 import { toast } from "react-toastify";
 
+const downloadImage = async (url, filename = "image") => {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    const blob = await res.blob();
+    const ext = blob.type.split("/")[1] || "jpg";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${filename}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch {
+    window.open(url, "_blank");
+  }
+};
+
 const Edit = ({ token }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -355,8 +370,21 @@ const Edit = ({ token }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
-                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                      Image {index + 1}
+                    <button
+                      type="button"
+                      onClick={() => downloadImage(imgUrl, name ? `${name.replace(/\s+/g, "-")}-${index + 1}` : `image-${index + 1}`)}
+                      className="absolute top-2 left-2 p-1.5 bg-gray-700 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-gray-800 shadow-lg"
+                      aria-label="Download image"
+                      title="Download image"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </button>
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center gap-1">
+                      <span className="bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                        Image {index + 1}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -365,7 +393,7 @@ const Edit = ({ token }) => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Hover over images to remove them. Upload new images below to add more.
+                Hover over images: left button = download, right button = remove. Upload new images below to add more.
               </p>
             </div>
           )}

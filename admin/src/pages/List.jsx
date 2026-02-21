@@ -5,6 +5,21 @@ import { UPLOAD_AREA_DATA_URI } from "../utils/icons";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const downloadImage = async (url, filename = "image") => {
+  try {
+    const res = await fetch(url, { mode: "cors" });
+    const blob = await res.blob();
+    const ext = blob.type.split("/")[1] || "jpg";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${filename}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch {
+    window.open(url, "_blank");
+  }
+};
+
 const List = ({ token }) => {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -62,12 +77,25 @@ const List = ({ token }) => {
                 className="grid grid-cols-1 md:grid-cols-[100px_2fr_1fr_1fr_120px] gap-3 sm:gap-4 px-3 sm:px-4 md:px-6 py-3 sm:py-4 hover:bg-gray-50 transition-colors"
               >
                 {/* Image */}
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                   <img
                     src={item.image && item.image[0] ? item.image[0] : UPLOAD_AREA_DATA_URI}
                     alt={item.name}
                     className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md border border-gray-200"
                   />
+                  {item.image && item.image[0] && (
+                    <button
+                      type="button"
+                      onClick={() => downloadImage(item.image[0], (item.name || "product").replace(/\s+/g, "-"))}
+                      className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Download image"
+                      aria-label="Download image"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
                 {/* Product Details */}
