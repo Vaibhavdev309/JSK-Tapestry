@@ -15,7 +15,7 @@ const BestSeller = () => {
       <div className="text-center mb-6 sm:mb-8">
         <Title text1={"Top"} text2={"Picks"} />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-7">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 sm:gap-6 lg:gap-7">
         {bestSeller.map((item, index) => (
           <ProductItem
             key={item._id}
