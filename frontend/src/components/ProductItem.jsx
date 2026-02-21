@@ -9,11 +9,11 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
 
   const content = (
     <>
-      <div className="overflow-hidden rounded-xl bg-stone-100">
+      <div className={`overflow-hidden rounded-xl bg-stone-100 ${compact ? "w-full" : "w-48 sm:w-56 md:w-60"}`}>
         {img ? (
           <img
-            className={`object-contain object-center w-full max-w-full transition-transform duration-300 hover:scale-105 ${
-              compact ? "aspect-square w-full" : "h-48 sm:h-56 md:h-60"
+            className={`object-contain object-center transition-transform duration-300 hover:scale-105 ${
+              compact ? "aspect-square w-full" : "w-full h-48 sm:h-56 md:h-60"
             }`}
             src={img}
             alt={name || "Tapestry"}
@@ -22,7 +22,7 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
         ) : (
           <div
             className={`flex items-center justify-center text-stone-400 bg-stone-100 ${
-              compact ? "aspect-square w-full min-h-[5rem]" : "h-48 sm:h-56 md:h-60"
+              compact ? "aspect-square w-full min-h-[5rem]" : "w-full h-48 sm:h-56 md:h-60"
             }`}
           >
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@ const ProductItem = ({ id, _id, image, name, compact }) => {
   return (
     <Link
       to={`/collection/${productId}`}
-      className="block text-stone-700 rounded-xl overflow-hidden border border-stone-200 bg-white shadow-sm hover:shadow-md hover:border-stone-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 min-w-0 p-3 sm:p-4"
+      className="block w-fit text-stone-700 rounded-xl overflow-hidden border border-stone-200 bg-white shadow-sm hover:shadow-md hover:border-stone-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 p-3 sm:p-4"
     >
       {content}
     </Link>

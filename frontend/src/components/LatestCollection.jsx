@@ -14,7 +14,7 @@ const LatestCollection = () => {
       <div className="text-center mb-6 sm:mb-8">
         <Title text1={"Latest"} text2={"Collections"} />
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5 sm:gap-6 lg:gap-7">
+      <div className="flex flex-wrap justify-center gap-5 sm:gap-6 lg:gap-7">
         {bestProducts.map((item, index) => (
           <ProductItem
             key={item._id}
