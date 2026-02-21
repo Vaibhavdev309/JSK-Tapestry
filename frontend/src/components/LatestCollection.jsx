@@ -14,13 +14,14 @@ const LatestCollection = () => {
       <div className="text-center mb-6 sm:mb-8">
         <Title text1={"Latest"} text2={"Collections"} />
       </div>
-      <div className="flex flex-wrap justify-center gap-5 sm:gap-6 lg:gap-7">
-        {bestProducts.map((item, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6 lg:gap-7 justify-items-center">
+        {bestProducts.map((item) => (
           <ProductItem
             key={item._id}
             id={item._id}
             image={item.image}
             name={item.name}
+            fluid
           />
         ))}
       </div>
