@@ -81,7 +81,11 @@ export const PLACEHOLDER_IMAGE = "data:image/svg+xml," + encodeURIComponent(`
 // Option 2: Use environment variables - set VITE_HERO_IMG_URL, etc. in .env
 // Option 3: Use CDN URLs - replace with your CDN URLs
 
-export const HERO_IMAGE = import.meta.env.VITE_HERO_IMG_URL || "/images/hero_img.png";
+// NOTE: The VITE_HERO_IMG_URL env override is intentionally NOT used here.
+// A stale value in the Vercel deployment env pointed at a broken external URL
+// (muselot.in, 404), which overrode the local image and showed the placeholder.
+// Hardcoding the local bundled image makes the hero robust regardless of that env var.
+export const HERO_IMAGE = "/images/hero_img.png";
 export const ABOUT_IMAGE = import.meta.env.VITE_ABOUT_IMG_URL || "/images/about_img.png";
 export const CONTACT_IMAGE = import.meta.env.VITE_CONTACT_IMG_URL || "/images/contact_img.png";
 
