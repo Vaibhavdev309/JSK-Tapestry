@@ -85,7 +85,7 @@ export const PLACEHOLDER_IMAGE = "data:image/svg+xml," + encodeURIComponent(`
 // A stale value in the Vercel deployment env pointed at a broken external URL
 // (muselot.in, 404), which overrode the local image and showed the placeholder.
 // Hardcoding the local bundled image makes the hero robust regardless of that env var.
-export const HERO_IMAGE = "/images/hero_img.png";
+export const HERO_IMAGE = "/images/hero_home.jpg";
 export const ABOUT_IMAGE = import.meta.env.VITE_ABOUT_IMG_URL || "/images/about_img.png";
 export const CONTACT_IMAGE = import.meta.env.VITE_CONTACT_IMG_URL || "/images/contact_img.png";
 
