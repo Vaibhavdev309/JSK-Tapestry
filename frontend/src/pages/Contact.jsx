@@ -118,12 +118,26 @@ const Contact = () => {
                 </li>
                 <li>
                   <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Phone</p>
-                  <a
-                    href="tel:+919305058581"
-                    className="text-stone-800 hover:text-amber-600 transition-colors"
-                  >
-                    +91 9305058581
-                  </a>
+                  <div className="flex flex-col gap-1">
+                    <a
+                      href="tel:+919792796766"
+                      className="text-stone-800 hover:text-amber-600 transition-colors"
+                    >
+                      +91 97927 96766
+                    </a>
+                    <a
+                      href="tel:+916393228341"
+                      className="text-stone-800 hover:text-amber-600 transition-colors"
+                    >
+                      +91 63932 28341
+                    </a>
+                    <a
+                      href="tel:+919305058581"
+                      className="text-stone-800 hover:text-amber-600 transition-colors"
+                    >
+                      +91 93050 58581
+                    </a>
+                  </div>
                 </li>
                 <li>
                   <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Address</p>

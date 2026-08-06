@@ -25,8 +25,8 @@ const Footer = () => {
             <p className="text-base font-bold tracking-wide text-stone-100">Contact</p>
             <div className="flex flex-col gap-1">
               <span className="text-stone-400">Phone:</span>
-              <a href="tel:+919305058581" aria-label="Phone" className="transition-colors text-amber-400 hover:text-amber-300">
-                +91 9305058581
+              <a href="tel:+919792796766" aria-label="Phone" className="transition-colors text-amber-400 hover:text-amber-300">
+                +91 97927 96766
               </a>
             </div>
             <div className="flex flex-col gap-1">
